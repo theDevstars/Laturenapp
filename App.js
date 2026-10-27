@@ -40,6 +40,61 @@ const QUICK_LINKS = [
   { title: 'Bible Gateway', subtitle: 'Read', url: 'https://www.biblegateway.com', mark: '✦', color: '#efb35f' },
 ];
 
+const DAILY_VERSES = [
+  {
+    "reference": "Psalm 91:1–2",
+    "text": "He who dwells in the secret place of the Most High\nwill rest in the shadow of the Almighty.\n\nI will say of Yahweh, “He is my refuge and my fortress;\nmy God, in whom I trust.”"
+  },
+  {
+    "reference": "Psalm 23:1",
+    "text": "Yahweh is my shepherd;\nI shall lack nothing."
+  },
+  {
+    "reference": "Psalm 46:1",
+    "text": "God is our refuge and strength,\na very present help in trouble."
+  },
+  {
+    "reference": "Psalm 121:1–2",
+    "text": "I will lift up my eyes to the hills.\nWhere does my help come from?\nMy help comes from Yahweh,\nwho made heaven and earth."
+  },
+  {
+    "reference": "Proverbs 3:5–6",
+    "text": "Trust in Yahweh with all your heart,\nand don’t lean on your own understanding.\nIn all your ways acknowledge him,\nand he will make your paths straight."
+  },
+  {
+    "reference": "Isaiah 41:10",
+    "text": "Don’t you be afraid, for I am with you.\nDon’t be dismayed, for I am your God.\nI will strengthen you.\nYes, I will help you.\nYes, I will uphold you with the right hand of my righteousness."
+  },
+  {
+    "reference": "Matthew 6:34",
+    "text": "Therefore don’t be anxious for tomorrow, for tomorrow will be anxious for itself. Each day’s own evil is sufficient."
+  },
+  {
+    "reference": "Matthew 11:28",
+    "text": "Come to me, all you who labor and are heavily burdened, and I will give you rest."
+  },
+  {
+    "reference": "John 14:27",
+    "text": "Peace I leave with you. My peace I give to you; not as the world gives, I give to you. Don’t let your heart be troubled, neither let it be fearful."
+  },
+  {
+    "reference": "Romans 8:28",
+    "text": "We know that all things work together for good for those who love God, for those who are called according to his purpose."
+  },
+  {
+    "reference": "Philippians 4:6–7",
+    "text": "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts in Christ Jesus."
+  },
+  {
+    "reference": "Joshua 1:9",
+    "text": "Haven’t I commanded you? Be strong and courageous. Don’t be afraid. Don’t be dismayed, for Yahweh your God is with you wherever you go."
+  },
+  {
+    "reference": "1 Peter 5:7",
+    "text": "Casting all your worries on him, because he cares for you."
+  }
+];
+
 function makeTarget(value, engine, preferHttps) {
   const input = value.trim();
   if (!input) return null;
@@ -98,6 +153,7 @@ export default function App() {
   const [editorVisible, setEditorVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [bookmarkName, setBookmarkName] = useState('');
+  const [today, setToday] = useState(() => new Date());
   const [bookmarkUrl, setBookmarkUrl] = useState('');
 
   useEffect(() => {
@@ -115,6 +171,18 @@ export default function App() {
       .catch(() => {});
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    const now = new Date();
+    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+    const timer = setTimeout(() => setToday(new Date()), Math.max(1000, nextMidnight.getTime() - now.getTime()));
+    return () => clearTimeout(timer);
+  }, [today]);
+
+  const dayOfYear = Math.floor(
+    (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) - Date.UTC(today.getFullYear(), 0, 1)) / 86400000
+  );
+  const dailyVerse = DAILY_VERSES[dayOfYear % DAILY_VERSES.length];
 
   const updateBookmarks = async (next) => {
     setBookmarks(next);
@@ -220,14 +288,9 @@ export default function App() {
               <Text style={styles.verseSpark}>✦</Text>
               <Text style={styles.verseLabel}>TODAY’S VERSE</Text>
             </View>
-            <Text style={styles.verseReference}>PSALM 91:1–2 · WEB</Text>
+            <Text style={styles.verseReference}>{dailyVerse.reference.toUpperCase()} · WEB</Text>
           </View>
-          <Text style={styles.verseText}>
-            He who dwells in the secret place of the Most High{'\n'}
-            will rest in the shadow of the Almighty.{'\n\n'}
-            I will say of Yahweh, “He is my refuge and my fortress;{'\n'}
-            my God, in whom I trust.”
-          </Text>
+          <Text style={styles.verseText}>{dailyVerse.text}</Text>
           <Text style={styles.verseFoot}>Psalm 91:1–2 · World English Bible</Text>
         </View>
       )}
