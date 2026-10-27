@@ -1,0 +1,69 @@
+name: Build Lantern IPA and APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    name: Build iOS IPA (unsigned)
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - name: Generate iOS project
+        run: npx expo prebuild --platform ios --non-interactive
+      - name: Build iOS app
+        run: |
+          cd ios
+          xcodebuild -workspace *.xcworkspace -scheme Lantern -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Package IPA
+        run: |
+          APP_PATH="ios/build/Build/Products/Release-iphoneos/Lantern.app"
+          test -d "$APP_PATH"
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -r Lantern-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Lantern-unsigned-IPA
+          path: Lantern-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --non-interactive
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lantern-APK
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 7
