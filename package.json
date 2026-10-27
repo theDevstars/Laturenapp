@@ -2,7 +2,11 @@
   "name": "lantern",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
-  "scripts": { "start": "expo start", "ios": "expo start --ios", "android": "expo start --android" },
+  "scripts": {
+    "start": "expo start --tunnel",
+    "ios": "expo start --ios",
+    "android": "expo start --android"
+  },
   "dependencies": {
     "expo": "~54.0.0",
     "expo-image-picker": "~17.0.0",
