@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lantern</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#101426;color:#fff;display:flex;flex-direction:column;height:100vh}
+.toolbar{display:flex;gap:8px;align-items:center;padding:10px;background:#fff;color:#202941}
+button{border:0;border-radius:8px;padding:10px 14px;background:#2347d9;color:white;font-weight:600;cursor:pointer}
+button.nav{background:#eef1f6;color:#202941;font-size:18px;padding:7px 12px}
+input{flex:1;min-width:100px;border:0;border-radius:9px;background:#eef1f6;padding:11px;color:#111827;font-size:14px}
+.verse{padding:10px 16px;background:#202941;text-align:center}.verse-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:700}.ref{color:#ffbf69}.verse img{display:block;width:100%;max-height:145px;object-fit:contain;border-radius:8px;background:#101426;cursor:pointer}.hint{color:#b8c0d4;font-size:11px;margin-top:6px}
+webview{flex:1;width:100%;background:#fff}
+</style>
+</head>
+<body>
+<div class="toolbar">
+<button class="nav" id="back" aria-label="Back">‹</button>
+<button class="nav" id="forward" aria-label="Forward">›</button>
+<input id="address" value="https://www.google.com" placeholder="Search or enter website" aria-label="Search or enter website">
+<button id="go">Go</button>
+</div>
+<section class="verse" id="verse">
+<div class="verse-top"><span>Daily Bible Verse</span><span class="ref">PSALM 91:1–2</span></div>
+<img src="https://dailyverses.net/images/en/niv/xl/psalms-91-1-2.jpg" alt="Psalm 91:1–2 Bible verse" id="verseImage">
+<div class="hint">Tap the verse to open it in the browser</div>
+</section>
+<webview id="browser" src="https://www.google.com" allowpopups></webview>
+<script>
+const browser=document.getElementById('browser');
+const address=document.getElementById('address');
+function go(){
+ let value=address.value.trim(); if(!value)return;
+ let target=/^https?:\/\//i.test(value)?value:(value.includes('.')&&!value.includes(' ')?'https://'+value:'https://www.google.com/search?q='+encodeURIComponent(value));
+ browser.src=target;
+}
+document.getElementById('go').addEventListener('click',go);
+address.addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+document.getElementById('back').addEventListener('click',()=>{if(browser.canGoBack())browser.goBack()});
+document.getElementById('forward').addEventListener('click',()=>{if(browser.canGoForward())browser.goForward()});
+document.getElementById('verse').addEventListener('click',()=>{browser.src='https://dailyverses.net/images/en/niv/xl/psalms-91-1-2.jpg';address.value='https://dailyverses.net/images/en/niv/xl/psalms-91-1-2.jpg'});
+browser.addEventListener('did-navigate',e=>{address.value=e.url});
+browser.addEventListener('did-navigate-in-page',e=>{address.value=e.url});
+</script>
+</body>
+</html>
