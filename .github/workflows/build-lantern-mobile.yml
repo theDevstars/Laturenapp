@@ -2,6 +2,11 @@ name: Build Lantern IPA, APK and EXE
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "app.json"
+      - "App.js"
+      - "assets/icon.png"
 
 permissions:
   contents: write
