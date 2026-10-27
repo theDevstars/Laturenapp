@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Lantern",
+    "slug": "lantern",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourname.lantern"
+    },
+    "android": {
+      "package": "com.yourname.lantern",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {"scheme": "http"},
+            {"scheme": "https"}
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      ["expo-image-picker", {"photosPermission": "Choose a wallpaper for Lantern."}]
+    ]
+  }
+}
