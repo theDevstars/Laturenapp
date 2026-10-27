@@ -19,7 +19,6 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
 
-const VERSE_IMAGE = 'https://dailyverses.net/images/en/niv/xl/psalms-91-1-2.jpg';
 const BOOKMARKS_KEY = '@lantern/bookmarks-v1';
 const SETTINGS_KEY = '@lantern/settings-v1';
 const DEFAULT_SETTINGS = {
@@ -27,6 +26,7 @@ const DEFAULT_SETTINGS = {
   preferHttps: true,
   javaScriptEnabled: true,
   allowPopups: false,
+  showDailyVerse: true,
 };
 const SEARCH_ENGINES = {
   DuckDuckGo: 'https://duckduckgo.com/?q=',
@@ -213,24 +213,24 @@ export default function App() {
         <Text style={styles.welcomeBody}>Search, read, and explore at your own pace.</Text>
       </View>
 
-      <View style={styles.verseCard}>
-        <View style={styles.verseTopline}>
-          <View style={styles.verseLabelWrap}>
-            <Text style={styles.verseSpark}>✦</Text>
-            <Text style={styles.verseLabel}>TODAY’S VERSE</Text>
+      {settings.showDailyVerse && (
+        <View style={styles.verseCard}>
+          <View style={styles.verseTopline}>
+            <View style={styles.verseLabelWrap}>
+              <Text style={styles.verseSpark}>✦</Text>
+              <Text style={styles.verseLabel}>TODAY’S VERSE</Text>
+            </View>
+            <Text style={styles.verseReference}>PSALM 91:1–2 · WEB</Text>
           </View>
-          <Text style={styles.verseReference}>PSALM 91:1–2</Text>
+          <Text style={styles.verseText}>
+            He who dwells in the secret place of the Most High{'\n'}
+            will rest in the shadow of the Almighty.{'\n\n'}
+            I will say of Yahweh, “He is my refuge and my fortress;{'\n'}
+            my God, in whom I trust.”
+          </Text>
+          <Text style={styles.verseFoot}>Psalm 91:1–2 · World English Bible</Text>
         </View>
-        <Pressable
-          onPress={() => navigate(VERSE_IMAGE)}
-          accessibilityRole="button"
-          accessibilityLabel="Open Psalm 91 verses 1 and 2"
-          style={({ pressed }) => pressed && styles.pressed}
-        >
-          <Image source={{ uri: VERSE_IMAGE }} style={styles.verseImage} resizeMode="contain" />
-        </Pressable>
-        <Text style={styles.verseFoot}>A quiet moment before you explore</Text>
-      </View>
+      )}
 
       <View style={styles.sectionHeading}>
         <Text style={styles.sectionTitle}>Quick paths</Text>
@@ -439,6 +439,17 @@ export default function App() {
               <IconButton label="Close settings" glyph="×" onPress={() => setSettingsVisible(false)} secondary />
             </View>
             <ScrollView style={styles.settingsScroll} keyboardShouldPersistTaps="handled">
+              <Text style={styles.settingsSectionTitle}>Home screen</Text>
+              <Text style={styles.settingsIntro}>Choose what appears when Lantern opens.</Text>
+              <View style={styles.settingsCard}>
+                <SettingRow
+                  title="Daily Bible verse"
+                  detail="Show or hide the verse on your Lantern home screen."
+                  value={settings.showDailyVerse}
+                  onValueChange={(value) => updateSetting('showDailyVerse', value)}
+                />
+              </View>
+
               <Text style={styles.settingsSectionTitle}>Search</Text>
               <Text style={styles.settingsIntro}>Choose where Lantern sends search terms. DuckDuckGo is selected by default.</Text>
               <View style={styles.engineOptions}>
@@ -523,6 +534,7 @@ const styles = StyleSheet.create({
   verseSpark: { color: '#e8b76d', fontSize: 15 },
   verseLabel: { color: '#f4e7cf', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
   verseReference: { color: '#e8b76d', fontSize: 10, fontWeight: '800', letterSpacing: 0.6 },
+  verseText: { color: '#f4f0e7', fontSize: 14, lineHeight: 21, paddingHorizontal: 5, paddingVertical: 8 },
   verseImage: { width: '100%', height: 88, backgroundColor: '#10192b', borderRadius: 12 },
   verseFoot: { color: '#8f9db2', fontSize: 11, marginTop: 8, marginLeft: 2 },
   sectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 21, marginBottom: 10 },
