@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-ios:
@@ -67,3 +67,34 @@ jobs:
           path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 7
+
+  create-release:
+    name: Publish release with mobile builds
+    runs-on: ubuntu-latest
+    needs: [build-ios, build-android]
+    steps:
+      - name: Download IPA artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Lantern-unsigned-IPA
+          path: release-files
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Lantern-APK
+          path: release-files
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: lantern-v1.0.${{ github.run_number }}
+          name: Lantern v1.0.${{ github.run_number }} - Bible Verse Update
+          body: |
+            Lantern browser app including the Psalm 91:1–2 Daily Bible Verse section.
+
+            Assets:
+            - Android APK: intended for Android devices.
+            - iOS IPA: unsigned build; standard iPhone installation requires Apple code signing.
+
+            Windows EXE is not included because this repository does not yet have a Windows desktop app target.
+          prerelease: true
+          files: release-files/*
