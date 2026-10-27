@@ -324,7 +324,7 @@ export default function App() {
             <Text style={styles.saveCurrentText}>Save page</Text>
           </Pressable>
         ) : (
-          <View style={styles.searchHint}><Text style={styles.searchHintText}>Private search with DuckDuckGo</Text></View>
+          <View style={styles.searchHint}><Text style={styles.searchHintText}>Search with {settings.searchEngine}</Text></View>
         )}
       </View>
 
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
   sheet: { backgroundColor: '#111b2c', borderColor: '#28364d', borderWidth: 1, borderTopLeftRadius: 25, borderTopRightRadius: 25, paddingHorizontal: 20, paddingTop: 11, paddingBottom: 28, maxHeight: '88%' },
   sheetHandle: { width: 40, height: 4, backgroundColor: '#43516a', borderRadius: 3, alignSelf: 'center', marginBottom: 15 },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 },
-  sheetTitle: { color: '#f5f4f0', fontSize: 21, fontWeight: '750' },
+  sheetTitle: { color: '#f5f4f0', fontSize: 21, fontWeight: '700' },
   sheetSubtitle: { color: '#93a0b5', fontSize: 12, marginTop: 4 },
   addBookmarkButton: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 13, backgroundColor: '#26354d', padding: 13, marginBottom: 10 },
   addBookmarkGlyph: { color: '#e8b76d', fontSize: 20, lineHeight: 22 },
