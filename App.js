@@ -102,6 +102,9 @@ const DAILY_VERSES = [
 function makeTarget(value, engine, preferHttps) {
   const input = value.trim();
   if (!input) return null;
+  if (/^![a-z0-9]+(?:\\s|$)/i.test(input)) {
+    return SEARCH_ENGINES.DuckDuckGo + encodeURIComponent(input);
+  }
   if (/^https?:\/\//i.test(input)) {
     if (preferHttps && /^http:\/\//i.test(input)) {
       return input.replace(/^http:\/\//i, 'https://');
@@ -406,7 +409,7 @@ export default function App() {
           keyboardType="url"
           returnKeyType="search"
           selectTextOnFocus
-          placeholder="Search DuckDuckGo or enter a site"
+          placeholder="Search or try !w / !yt"
           placeholderTextColor="#8995aa"
           style={styles.addressInput}
           accessibilityLabel="Search DuckDuckGo or enter a website"
@@ -579,7 +582,7 @@ export default function App() {
               </View>
 
               <Text style={styles.settingsSectionTitle}>Search</Text>
-              <Text style={styles.settingsIntro}>Choose where Lantern sends search terms. DuckDuckGo is selected by default.</Text>
+              <Text style={styles.settingsIntro}>Choose where Lantern sends search terms. Bang shortcuts like !w and !yt use DuckDuckGo.</Text>
               <View style={styles.engineOptions}>
                 {Object.keys(SEARCH_ENGINES).map((engine) => (
                   <Pressable
