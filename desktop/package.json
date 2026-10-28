@@ -1,9 +1,9 @@
 {
-  "name": "lantern-desktop",
+  "name": "saturn-desktop",
   "version": "1.0.10",
-  "description": "Lantern browser with Daily Bible Verse",
+  "description": "Saturn browser",
   "main": "main.js",
-  "author": "Lantern",
+  "author": "Saturn",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis"
@@ -14,7 +14,7 @@
   },
   "build": {
     "appId": "com.lantern.browser",
-    "productName": "Lantern",
+    "productName": "Saturn",
     "directories": {
       "output": "dist"
     },
@@ -26,7 +26,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Lantern-Setup-${version}.${ext}"
+      "artifactName": "Saturn-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
