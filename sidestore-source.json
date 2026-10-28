@@ -17,12 +17,12 @@
       "category": "utilities",
       "versions": [
         {
-          "version": "1.0.42",
-          "buildVersion": "42",
-          "date": "2026-10-28T19:59:25.665Z",
+          "version": "1.0.43",
+          "buildVersion": "43",
+          "date": "2026-10-28T20:20:04.113Z",
           "localizedDescription": "Lantern browser update.",
-          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/lantern-v1.0.42/Lantern-unsigned.ipa",
-          "size": 6805221
+          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/lantern-v1.0.43/Lantern-unsigned.ipa",
+          "size": 6805250
         }
       ],
       "appPermissions": {
