@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ImageBackground,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -18,6 +19,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
+import * as ImagePicker from 'expo-image-picker';
 
 const BOOKMARKS_KEY = '@lantern/bookmarks-v1';
 const SETTINGS_KEY = '@lantern/settings-v1';
@@ -28,6 +30,7 @@ const DEFAULT_SETTINGS = {
   allowPopups: false,
   showDailyVerse: true,
   verseTranslation: 'KJV',
+  backgroundImage: null,
 };
 const SEARCH_ENGINES = {
   DuckDuckGo: 'https://duckduckgo.com/?q=',
@@ -256,6 +259,28 @@ export default function App() {
     setAddress(bookmark.url);
     setUrl(bookmark.url);
     setPageTitle(bookmark.name);
+  };
+
+  const chooseBackground = async () => {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Photo access needed', 'Allow Lantern to choose a photo for your home background.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        base64: true,
+        quality: 0.55,
+      });
+      const image = result.assets && result.assets[0];
+      if (!result.canceled && image?.base64) {
+        await updateSetting('backgroundImage', 'data:image/jpeg;base64,' + image.base64);
+      }
+    } catch (_) {
+      Alert.alert('Could not set background', 'Please choose another photo and try again.');
+    }
   };
 
   const clearBrowserData = () => {
@@ -521,6 +546,17 @@ export default function App() {
                 />
               </View>
 
+              <Text style={styles.settingsSectionTitle}>Home background</Text>
+              <Text style={styles.settingsIntro}>Choose a photo from your library for Lantern’s home screen.</Text>
+              <View style={styles.backgroundActions}>
+                <Pressable onPress={chooseBackground} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
+                  <Text style={styles.backgroundActionText}>Choose photo</Text>
+                </Pressable>
+                <Pressable onPress={() => updateSetting('backgroundImage', null)} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
+                  <Text style={styles.backgroundActionText}>Reset</Text>
+                </Pressable>
+              </View>
+
               <Text style={styles.settingsSectionTitle}>Bible translation</Text>
               <Text style={styles.settingsIntro}>Choose the translation opened on BibleGateway when you tap the verse link.</Text>
               <View style={styles.engineOptions}>
@@ -578,12 +614,15 @@ export default function App() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+      </SafeAreaView>
+      </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#0b1220' },
+  backgroundImageStyle: { opacity: 0.28 },
+  safeRoot: { flex: 1, backgroundColor: 'transparent' },
   header: { paddingHorizontal: 18, paddingTop: 10, paddingBottom: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 },
   brandIcon: { width: 42, height: 42, borderRadius: 12 },
@@ -675,6 +714,9 @@ const styles = StyleSheet.create({
   settingsScroll: { flexGrow: 0, maxHeight: 580 },
   settingsSectionTitle: { color: '#e8b76d', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 7, marginBottom: 7 },
   settingsIntro: { color: '#92a0b6', fontSize: 12, lineHeight: 18, marginBottom: 10 },
+  backgroundActions: { flexDirection: 'row', gap: 8, marginBottom: 17 },
+  backgroundAction: { flex: 1, minHeight: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1 },
+  backgroundActionText: { color: '#e8edf4', fontSize: 12, fontWeight: '700' },
   engineOptions: { flexDirection: 'row', gap: 7, marginBottom: 17 },
   engineOption: { flex: 1, minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, paddingHorizontal: 4, gap: 4 },
   engineOptionSelected: { borderColor: '#e6ad60', backgroundColor: '#392f28' },
