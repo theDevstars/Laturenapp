@@ -1,17 +1,17 @@
 {
-  "name": "Lantern",
+  "name": "Saturn",
   "subtitle": "A calmer web browser",
-  "description": "Lantern for iPhone and iPad. Updates are published with each GitHub release.",
+  "description": "Saturn for iPhone and iPad. Updates are published with each GitHub release.",
   "iconURL": "https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png",
   "website": "https://github.com/theDevstars/Laturenapp",
   "tintColor": "#DDAF64",
   "apps": [
     {
-      "name": "Lantern",
+      "name": "Saturn",
       "bundleIdentifier": "com.yourname.lantern",
       "developerName": "theDevstars",
       "subtitle": "Browse with a little more calm",
-      "localizedDescription": "Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.",
+      "localizedDescription": "Saturn browser with search, bookmarks, Quick Paths, and daily Bible verses.",
       "iconURL": "https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png",
       "tintColor": "#DDAF64",
       "category": "utilities",
