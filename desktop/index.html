@@ -1,47 +1,84 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Lantern</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#101426;color:#fff;display:flex;flex-direction:column;height:100vh}
-.toolbar{display:flex;gap:8px;align-items:center;padding:10px;background:#fff;color:#202941}
-button{border:0;border-radius:8px;padding:10px 14px;background:#2347d9;color:white;font-weight:600;cursor:pointer}
-button.nav{background:#eef1f6;color:#202941;font-size:18px;padding:7px 12px}
-input{flex:1;min-width:100px;border:0;border-radius:9px;background:#eef1f6;padding:11px;color:#111827;font-size:14px}
-.verse{padding:10px 16px;background:#202941;text-align:center}.verse-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:700}.ref{color:#ffbf69}.verse img{display:block;width:100%;max-height:145px;object-fit:contain;border-radius:8px;background:#101426;cursor:pointer}.hint{color:#b8c0d4;font-size:11px;margin-top:6px}
-webview{flex:1;width:100%;background:#fff}
-</style>
-</head>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#121d30;--line:#26364e;--ink:#f5f3ee;--muted:#9ba9bd;--gold:#e6b366;--accent:#ddb064}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:4;background:#0e1727;border-bottom:1px solid #202d42;padding:12px clamp(14px,3vw,30px) 10px}
+.brandrow,.toolbar,.actions,.brand{display:flex;align-items:center}.brandrow{justify-content:space-between;gap:14px;margin-bottom:10px}.brand{gap:10px}.mark{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#27344a;color:var(--gold);font-size:19px}.brandname{font-weight:750;font-size:17px}.tagline{font-size:11px;color:var(--muted);margin-top:1px}.actions{gap:7px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#19263a;color:var(--ink);border-radius:11px;padding:9px 12px;font-weight:650}button:hover{border-color:#64738b;background:#202e44}button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.primary{background:var(--accent);border-color:var(--accent);color:#182235}.toolbar{gap:7px}.address{flex:1;min-width:80px;border:1px solid var(--line);background:#172238;color:var(--ink);border-radius:11px;padding:11px 13px;font:inherit}
+.nav{padding:8px 12px;font-size:18px}.progress{height:2px;background:var(--gold);display:none}main{width:min(100%,920px);margin:0 auto;padding:clamp(20px,4vw,38px) clamp(14px,3vw,28px);flex:1}.welcome{margin:0 0 20px}.eyebrow{font-size:10px;letter-spacing:1.6px;font-weight:800;color:var(--gold)}h1{font-size:clamp(27px,4vw,40px);letter-spacing:-1px;line-height:1.12;margin:8px 0}.welcome p{color:var(--muted);margin:7px 0}
+.verse{position:relative;margin:0 0 26px;padding:16px 18px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(125deg,#18263b,#121d30 65%);max-width:820px}.verse[hidden]{display:none}.versehead{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:9px}.label{font-size:10px;letter-spacing:1px;font-weight:800;color:#e8dcc8}.ref{color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.5px;text-align:right}.versetext{white-space:pre-line;line-height:1.55;font-size:14px;color:#f1eee8;max-width:760px}.source{font-size:10px;color:#8493a9;margin-top:8px}
+.sectionhead{display:flex;align-items:baseline;justify-content:space-between;margin:20px 0 10px}.sectionhead strong{font-size:15px}.sectionhead span{font-size:11px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.tile{display:flex;gap:11px;align-items:center;min-height:68px;border:1px solid #202e43;border-radius:14px;background:#111c2d;color:inherit;text-decoration:none;padding:12px;transition:.15s}.tile:hover{background:#19283d;border-color:#43536c;transform:translateY(-1px)}.tilemark{width:33px;height:33px;display:grid;place-items:center;background:#28364a;color:var(--gold);border-radius:10px;font-weight:800;font-size:15px;flex:none}.tiletitle{font-weight:700;font-size:12px}.tilesub{color:var(--muted);font-size:10px;margin-top:3px}
+#browser{display:none;flex:1;width:100%;min-height:0;border:0;background:white}body.browsing main{display:none}body.browsing #browser{display:flex}
+dialog{border:1px solid #34445d;border-radius:18px;background:#111c2d;color:var(--ink);width:min(540px,calc(100% - 24px));max-height:85vh;padding:0;box-shadow:0 22px 70px #0009}dialog::backdrop{background:#030814bd}.dialogbody{padding:20px;overflow:auto;max-height:85vh}.dialogtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.dialogtop h2{margin:0;font-size:20px}.muted{color:var(--muted);font-size:12px;line-height:1.5}.row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #263248}.row:last-child{border:0}.rowcopy{flex:1}.rowtitle{font-weight:700;font-size:13px}.rowdesc{color:var(--muted);font-size:11px;margin-top:4px;line-height:1.45}.switch{accent-color:var(--gold);width:18px;height:18px}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:11px;color:#aab7ca}.field input,.field select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#172238;color:var(--ink);font:inherit}.bookmark{border:1px solid #293750;border-radius:12px;padding:11px;margin:8px 0}.bmrow{display:flex;align-items:center;gap:8px}.bmcopy{flex:1;min-width:0}.bmname{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bmurl{color:var(--muted);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}.small{padding:7px 9px;font-size:11px}.dialogfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+@media(max-width:640px){.tagline{display:none}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.actions button{padding:8px 9px;font-size:12px}.toolbar{gap:5px}.nav{padding:8px 10px}.address{padding:10px 9px;font-size:12px}.verse{padding:13px;border-radius:14px}.versetext{font-size:13px;line-height:1.5}main{padding-top:23px}}
+</style></head>
 <body>
-<div class="toolbar">
-<button class="nav" id="back" aria-label="Back">‹</button>
-<button class="nav" id="forward" aria-label="Forward">›</button>
-<input id="address" value="https://www.google.com" placeholder="Search or enter website" aria-label="Search or enter website">
-<button id="go">Go</button>
-</div>
-<section class="verse" id="verse">
-<div class="verse-top"><span>Daily Bible Verse</span><span class="ref">PSALM 91:1–2</span></div>
-<img src="https://dailyverses.net/images/en/niv/xl/psalms-91-1-2.jpg" alt="Psalm 91:1–2 Bible verse" id="verseImage">
-<div class="hint">Tap the verse to open it in the browser</div>
-</section>
-<webview id="browser" src="https://www.google.com" allowpopups></webview>
+<header><div class="brandrow"><div class="brand"><div class="mark">✦</div><div><div class="brandname">Lantern</div><div class="tagline">Browse with a little more calm</div></div></div><div class="actions"><button id="savedBtn">Saved</button><button id="settingsBtn">Settings</button></div></div>
+<div class="toolbar"><button class="nav" id="back" aria-label="Back">‹</button><button class="nav" id="forward" aria-label="Forward">›</button><button class="nav" id="home" aria-label="Home">⌂</button><input class="address" id="address" placeholder="Search DuckDuckGo or enter a site" aria-label="Search DuckDuckGo or enter a site"><button class="primary" id="go">Go</button></div></header>
+<div class="progress" id="progress"></div>
+<main><section class="welcome"><div class="eyebrow">YOUR SPACE ON THE WEB</div><h1>A little light for the way ahead.</h1><p>Search, read, and explore at your own pace.</p></section>
+<section class="verse" id="verse"><div class="versehead"><span class="label">✦ &nbsp;TODAY’S VERSE</span><span class="ref" id="verseRef"></span></div><div class="versetext" id="verseText"></div><div class="source">World English Bible · Changes daily</div></section>
+<div class="sectionhead"><strong>Quick paths</strong><span>A few good places to begin</span></div><div class="grid">
+<a class="tile" href="https://duckduckgo.com"><span class="tilemark">D</span><span><div class="tiletitle">DuckDuckGo</div><div class="tilesub">Private search</div></span></a>
+<a class="tile" href="https://www.youtube.com"><span class="tilemark">▶</span><span><div class="tiletitle">YouTube</div><div class="tilesub">Watch</div></span></a>
+<a class="tile" href="https://www.wikipedia.org"><span class="tilemark">W</span><span><div class="tiletitle">Wikipedia</div><div class="tilesub">Explore</div></span></a>
+<a class="tile" href="https://www.biblegateway.com"><span class="tilemark">✦</span><span><div class="tiletitle">Bible Gateway</div><div class="tilesub">Read</div></span></a>
+</div></main>
+<webview id="browser" partition="persist:lantern" webpreferences="contextIsolation=yes,nodeIntegration=no,sandbox=yes"></webview>
+<dialog id="settings"><div class="dialogbody"><div class="dialogtop"><div><h2>Settings &amp; safety</h2><div class="muted">Your browser, your comfort.</div></div><button data-close="settings">✕</button></div>
+<div class="field"><label for="engine">Search provider</label><select id="engine"><option>DuckDuckGo</option><option>Google</option><option>Bing</option></select></div>
+<div class="row"><div class="rowcopy"><div class="rowtitle">Daily Bible verse</div><div class="rowdesc">Show the text verse on the start page.</div></div><input class="switch" id="showVerse" type="checkbox"></div>
+<div class="row"><div class="rowcopy"><div class="rowtitle">Prefer secure connections</div><div class="rowdesc">Use HTTPS for typed site names.</div></div><input class="switch" id="https" type="checkbox"></div>
+<div class="row"><div class="rowcopy"><div class="rowtitle">JavaScript</div><div class="rowdesc">Some websites need this enabled.</div></div><input class="switch" id="js" type="checkbox"></div>
+<div class="row"><div class="rowcopy"><div class="rowtitle">Allow pop-up windows</div><div class="rowdesc">Pop-ups are blocked unless you turn this on.</div></div><input class="switch" id="popups" type="checkbox"></div>
+<p class="muted">Search goes to your selected provider. Web pages cannot access local files through Lantern.</p>
+<div class="dialogfoot"><button data-close="settings">Done</button></div></div></dialog>
+<dialog id="saved"><div class="dialogbody"><div class="dialogtop"><div><h2>Saved pages</h2><div class="muted">Add, open, or edit your shortcuts.</div></div><button data-close="saved">✕</button></div><div id="bookmarkList"></div><div class="dialogfoot"><button id="addBookmark" class="primary">＋ Save current page</button><button data-close="saved">Done</button></div></div></dialog>
+<dialog id="editor"><div class="dialogbody"><div class="dialogtop"><h2 id="editorTitle">Save page</h2><button data-close="editor">✕</button></div><div class="field"><label for="bmName">Name</label><input id="bmName" maxlength="80"></div><div class="field"><label for="bmUrl">Web address</label><input id="bmUrl" placeholder="https://example.com"></div><div class="dialogfoot"><button id="removeBookmark">Remove</button><button data-close="editor">Cancel</button><button class="primary" id="saveBookmark">Save</button></div></div></dialog>
 <script>
-const browser=document.getElementById('browser');
-const address=document.getElementById('address');
-function go(){
- let value=address.value.trim(); if(!value)return;
- let target=/^https?:\/\//i.test(value)?value:(value.includes('.')&&!value.includes(' ')?'https://'+value:'https://www.google.com/search?q='+encodeURIComponent(value));
- browser.src=target;
-}
-document.getElementById('go').addEventListener('click',go);
-address.addEventListener('keydown',e=>{if(e.key==='Enter')go()});
-document.getElementById('back').addEventListener('click',()=>{if(browser.canGoBack())browser.goBack()});
-document.getElementById('forward').addEventListener('click',()=>{if(browser.canGoForward())browser.goForward()});
-document.getElementById('verse').addEventListener('click',()=>{browser.src='https://dailyverses.net/images/en/niv/xl/psalms-91-1-2.jpg';address.value='https://dailyverses.net/images/en/niv/xl/psalms-91-1-2.jpg'});
-browser.addEventListener('did-navigate',e=>{address.value=e.url});
-browser.addEventListener('did-navigate-in-page',e=>{address.value=e.url});
-</script>
-</body>
-</html>
+const $=s=>document.querySelector(s), address=$('#address'), browser=$('#browser');
+const verses=[
+["Psalm 91:1–2","He who dwells in the secret place of the Most High\nwill rest in the shadow of the Almighty.\n\nI will say of Yahweh, “He is my refuge and my fortress;\nmy God, in whom I trust.”"],
+["Psalm 23:1","Yahweh is my shepherd;\nI shall lack nothing."],
+["Psalm 46:1","God is our refuge and strength,\na very present help in trouble."],
+["Psalm 121:1–2","I will lift up my eyes to the hills.\nWhere does my help come from?\nMy help comes from Yahweh,\nwho made heaven and earth."],
+["Proverbs 3:5–6","Trust in Yahweh with all your heart,\nand don’t lean on your own understanding.\nIn all your ways acknowledge him,\nand he will make your paths straight."],
+["Isaiah 41:10","Don’t you be afraid, for I am with you.\nDon’t be dismayed, for I am your God.\nI will strengthen you. Yes, I will help you."],
+["Matthew 6:34","Therefore don’t be anxious for tomorrow, for tomorrow will be anxious for itself."],
+["Matthew 11:28","Come to me, all you who labor and are heavily burdened, and I will give you rest."],
+["John 14:27","Peace I leave with you. My peace I give to you. Don’t let your heart be troubled."],
+["Romans 8:28","All things work together for good for those who love God."],
+["Philippians 4:6–7","In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God."],
+["Joshua 1:9","Be strong and courageous. Don’t be afraid. Yahweh your God is with you wherever you go."],
+["1 Peter 5:7","Casting all your worries on him, because he cares for you."]
+];
+const defaults={engine:'DuckDuckGo',showVerse:true,https:true,js:true,popups:false};
+let settings={...defaults,...read('settings',{})}, bookmarks=read('bookmarks',[]), editing=null, currentUrl='';
+function read(k,d){try{return JSON.parse(localStorage.getItem('lantern-'+k))??d}catch{return d}}
+function persist(k,v){localStorage.setItem('lantern-'+k,JSON.stringify(v))}
+function renderVerse(){const n=new Date(),d=Math.floor((Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())-Date.UTC(n.getFullYear(),0,1))/86400000),v=verses[d%verses.length];$('#verseRef').textContent=v[0].toUpperCase()+' · WEB';$('#verseText').textContent=v[1];$('#verse').hidden=!settings.showVerse}
+function renderSettings(){ $('#engine').value=settings.engine;$('#showVerse').checked=settings.showVerse;$('#https').checked=settings.https;$('#js').checked=settings.js;$('#popups').checked=settings.popups;renderVerse()}
+function setSetting(k,v){settings[k]=v;persist('settings',settings);renderSettings();if(k==='js'||k==='popups')applyBrowserSettings()}
+function target(raw){let v=raw.trim();if(!v)return null;if(/^https?:\/\//i.test(v))return settings.https?v.replace(/^http:\/\//i,'https://'):v;if(/^[a-z][a-z0-9+.-]*:/i.test(v))return null;if(v.includes('.')&&!/\s/.test(v))return 'https://'+v;let bases={DuckDuckGo:'https://duckduckgo.com/?q=',Google:'https://www.google.com/search?q=',Bing:'https://www.bing.com/search?q='};return bases[settings.engine]+encodeURIComponent(v)}
+function navigate(raw=address.value){let u=target(raw);if(!u){address.focus();return}currentUrl=u;address.value=u;document.body.classList.add('browsing');browser.src=u}
+function applyBrowserSettings(){if(currentUrl){const u=currentUrl;browser.removeAttribute('src');browser.setAttribute('webpreferences','contextIsolation=yes,nodeIntegration=no,sandbox=yes,javascript='+settings.js);if(settings.popups)browser.setAttribute('allowpopups','');else browser.removeAttribute('allowpopups');setTimeout(()=>browser.src=u,0)}else{browser.setAttribute('webpreferences','contextIsolation=yes,nodeIntegration=no,sandbox=yes,javascript='+settings.js);if(settings.popups)browser.setAttribute('allowpopups','');else browser.removeAttribute('allowpopups')}}
+$('#go').onclick=()=>navigate();address.addEventListener('keydown',e=>{if(e.key==='Enter')navigate()});
+$('#back').onclick=()=>{if(browser.canGoBack())browser.goBack()};$('#forward').onclick=()=>{if(browser.canGoForward())browser.goForward()};
+$('#home').onclick=()=>{currentUrl='';browser.removeAttribute('src');document.body.classList.remove('browsing');address.value='';address.focus()};
+browser.addEventListener('did-navigate',e=>{address.value=e.url;currentUrl=e.url});browser.addEventListener('did-navigate-in-page',e=>{address.value=e.url;currentUrl=e.url});
+browser.addEventListener('will-navigate',e=>{if(!/^https?:\/\//i.test(e.url))e.preventDefault()});
+document.querySelectorAll('.tile').forEach(a=>a.onclick=e=>{e.preventDefault();navigate(a.href)});
+$('#settingsBtn').onclick=()=>$('#settings').showModal();$('#savedBtn').onclick=()=>{renderBookmarks();$('#saved').showModal()};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$('#'+b.dataset.close).close());
+$('#engine').onchange=e=>setSetting('engine',e.target.value);$('#showVerse').onchange=e=>setSetting('showVerse',e.target.checked);$('#https').onchange=e=>setSetting('https',e.target.checked);$('#js').onchange=e=>setSetting('js',e.target.checked);$('#popups').onchange=e=>setSetting('popups',e.target.checked);
+function renderBookmarks(){let box=$('#bookmarkList');box.replaceChildren();if(!bookmarks.length){let p=document.createElement('p');p.className='muted';p.textContent='No saved pages yet. Save this page or add one while browsing.';box.append(p)}bookmarks.forEach((b,i)=>{let card=document.createElement('div');card.className='bookmark';let row=document.createElement('div');row.className='bmrow';let copy=document.createElement('div');copy.className='bmcopy';let name=document.createElement('div');name.className='bmname';name.textContent=b.name;let url=document.createElement('div');url.className='bmurl';url.textContent=b.url;copy.append(name,url);let open=document.createElement('button');open.className='small';open.textContent='Open';open.onclick=()=>{ $('#saved').close();navigate(b.url)};let edit=document.createElement('button');edit.className='small';edit.textContent='Edit';edit.onclick=()=>openEditor(i);row.append(copy,open,edit);card.append(row);box.append(card)})}
+function openEditor(i=null){editing=i;let b=i===null?{name:'',url:currentUrl||''}:bookmarks[i];$('#editorTitle').textContent=i===null?'Save page':'Edit saved page';$('#bmName').value=b.name;$('#bmUrl').value=b.url;$('#removeBookmark').style.display=i===null?'none':'inline-block';if($('#saved').open)$('#saved').close();$('#editor').showModal()}
+$('#addBookmark').onclick=()=>openEditor();$('#saveBookmark').onclick=()=>{let name=$('#bmName').value.trim(),url=target($('#bmUrl').value);if(!name||!url){alert('Add a name and valid web address.');return}let item={name,url};if(editing===null)bookmarks.unshift(item);else bookmarks[editing]=item;persist('bookmarks',bookmarks);$('#editor').close();renderBookmarks();$('#saved').showModal()};
+$('#removeBookmark').onclick=()=>{if(editing!==null){bookmarks.splice(editing,1);persist('bookmarks',bookmarks)}$('#editor').close();renderBookmarks();$('#saved').showModal()};
+renderSettings();applyBrowserSettings();
+setInterval(()=>{const d=new Date();if(d.getHours()===0&&d.getMinutes()===0)renderVerse()},30000);
+</script></body></html>
