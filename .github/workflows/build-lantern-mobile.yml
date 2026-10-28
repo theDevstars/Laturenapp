@@ -69,6 +69,10 @@ jobs:
           java-version: 17
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Generate Saturn app icon
+        run: |
+          npm install --no-save sharp
+          node -e "require('sharp')('assets/saturn-icon.svg').resize(1024,1024).png().toFile('assets/icon.png')"
       - name: Set native app version for this build
         env:
           BUILD_NUMBER: ${{ github.run_number }}
