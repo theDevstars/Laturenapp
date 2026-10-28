@@ -796,25 +796,25 @@ export default function App() {
           </View>
         </View>
       </Modal>
-      <Modal visible={settingsVisible} animationType="slide" transparent onRequestClose={() => setSettingsVisible(false)}>
-        <View style={styles.modalBackdrop}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setSettingsVisible(false)} accessibilityLabel="Close settings" />
-          <View style={styles.sheet}>
-            <View style={styles.sheetHandle} />
-            <View style={styles.sheetHeader}>
-              <View>
-                <Text style={styles.sheetTitle}>Settings & safety</Text>
-                <Text style={styles.sheetSubtitle}>Your browser, your comfort.</Text>
-              </View>
-              <IconButton label="Close settings" glyph="×" onPress={() => setSettingsVisible(false)} secondary />
+      <Modal visible={settingsVisible} animationType="slide" transparent={false} presentationStyle="fullScreen" onRequestClose={() => setSettingsVisible(false)}>
+        <SafeAreaView style={styles.settingsPage}>
+          <View style={styles.settingsPageHeader}>
+            <Pressable onPress={() => setSettingsVisible(false)} style={({ pressed }) => [styles.settingsBackButton, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Back to Saturn">
+              <Text style={styles.settingsBackGlyph}>‹</Text>
+            </Pressable>
+            <View style={styles.settingsPageHeading}>
+              <Text style={styles.settingsPageTitle}>Settings</Text>
+              <Text style={styles.settingsPageSubtitle}>Make Saturn work your way</Text>
             </View>
-            <ScrollView style={styles.settingsScroll} keyboardShouldPersistTaps="handled">
+            <Image source={require('./assets/icon.png')} style={styles.settingsPageIcon} />
+          </View>
+          <ScrollView style={styles.settingsScroll} contentContainerStyle={styles.settingsPageContent} keyboardShouldPersistTaps="handled">
               <Text style={styles.settingsSectionTitle}>Home screen</Text>
-              <Text style={styles.settingsIntro}>Choose what appears when Lantern opens.</Text>
+              <Text style={styles.settingsIntro}>Choose what appears when Saturn opens.</Text>
               <View style={styles.settingsCard}>
                 <SettingRow
                   title="Daily Bible verse"
-                  detail="Show or hide the verse on your Lantern home screen."
+                  detail="Show or hide the verse on your Saturn home screen."
                   value={settings.showDailyVerse}
                   onValueChange={(value) => updateSetting('showDailyVerse', value)}
                 />
@@ -837,7 +837,7 @@ export default function App() {
               </View>
 
               <Text style={styles.settingsSectionTitle}>Home background</Text>
-              <Text style={styles.settingsIntro}>Choose a photo from your library for Lantern’s home screen.</Text>
+              <Text style={styles.settingsIntro}>Choose a photo from your library for Saturn’s home screen.</Text>
               <View style={styles.backgroundActions}>
                 <Pressable onPress={chooseBackground} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
                   <Text style={styles.backgroundActionText}>Choose photo</Text>
@@ -848,7 +848,7 @@ export default function App() {
               </View>
 
               <Text style={styles.settingsSectionTitle}>Bible translation</Text>
-              <Text style={styles.settingsIntro}>The verse on your home screen changes to the translation you pick. These are public-domain texts that load from bible-api.com. KJV and WEB also work offline.</Text>
+              <Text style={styles.settingsIntro}>The verse on your Saturn home screen changes to the translation you pick. These are public-domain texts that load from bible-api.com. KJV and WEB also work offline.</Text>
               <View style={styles.transWrap}>
                 {[...TRANSLATIONS, ...apiBibles].map((item) => (
                   <Pressable
@@ -911,7 +911,7 @@ export default function App() {
                   <Text style={styles.privacyNoteTitle}>Built for a little more privacy</Text>
                   <Text style={styles.privacyNoteBody}>
                     {Platform.OS === 'android'
-                      ? 'Lantern blocks local-file access and third-party cookies. Search stays with your selected provider.'
+                      ? 'Saturn blocks local-file access and third-party cookies. Search stays with your selected provider.'
                       : 'Lantern blocks local-file access. On iPhone, turn on Private browsing to avoid keeping cookies and site data. Search stays with your selected provider.'}
                   </Text>
                 </View>
@@ -927,9 +927,8 @@ export default function App() {
                 <Text style={styles.clearDataGlyph}>⌫</Text>
                 <Text style={styles.clearDataText}>{Platform.OS === 'android' ? 'Clear cache and history' : 'Clear history'}</Text>
               </Pressable>
-            </ScrollView>
-          </View>
-        </View>
+          </ScrollView>
+        </SafeAreaView>
       </Modal>
       </SafeAreaView>
       </ImageBackground>
@@ -1043,7 +1042,16 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: '#1a2435', fontSize: 14, fontWeight: '800' },
   removeButton: { alignItems: 'center', paddingVertical: 14 },
   removeButtonText: { color: '#e58c87', fontSize: 13, fontWeight: '700' },
-  settingsScroll: { flexGrow: 0, maxHeight: 580 },
+  settingsPage: { flex: 1, backgroundColor: '#0b1220' },
+  settingsPageHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 12, paddingBottom: 18, borderBottomWidth: 1, borderBottomColor: '#263248', gap: 12 },
+  settingsBackButton: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#172238', borderWidth: 1, borderColor: '#293752' },
+  settingsBackGlyph: { color: '#e8b76d', fontSize: 34, lineHeight: 38, marginTop: -3 },
+  settingsPageHeading: { flex: 1 },
+  settingsPageTitle: { color: '#f7f4ee', fontSize: 25, fontWeight: '800', letterSpacing: -0.4 },
+  settingsPageSubtitle: { color: '#8995aa', fontSize: 12, marginTop: 3 },
+  settingsPageIcon: { width: 40, height: 40, borderRadius: 12 },
+  settingsPageContent: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 34 },
+  settingsScroll: { flex: 1 },
   settingsSectionTitle: { color: '#e8b76d', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 7, marginBottom: 7 },
   settingsIntro: { color: '#92a0b6', fontSize: 12, lineHeight: 18, marginBottom: 10 },
   backgroundActions: { flexDirection: 'row', gap: 8, marginBottom: 17 },
