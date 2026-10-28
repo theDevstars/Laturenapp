@@ -26,6 +26,15 @@ jobs:
         run: |
           npm install --no-save sharp
           node -e "require('sharp')('assets/saturn-icon.svg').resize(1024,1024).png().toFile('assets/icon.png')"
+      - name: Commit generated Saturn PNG icon
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/icon.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Update app icon to Saturn"
+            git push
+          fi
       - name: Generate iOS project
         run: npx expo prebuild --platform ios --non-interactive
       - name: Build app without code signing
