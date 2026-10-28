@@ -2,14 +2,14 @@
   "expo": {
     "name": "Lantern",
     "slug": "lantern",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourname.lantern",
-      "buildNumber": "9"
+      "buildNumber": "10"
     },
     "android": {
       "package": "com.yourname.lantern",
@@ -30,7 +30,7 @@
           ]
         }
       ],
-      "versionCode": 9
+      "versionCode": 10
     },
     "plugins": [
       [
