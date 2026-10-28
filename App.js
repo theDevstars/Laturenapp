@@ -5,6 +5,7 @@ import {
   Image,
   ImageBackground,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -23,14 +24,16 @@ import * as ImagePicker from 'expo-image-picker';
 
 const BOOKMARKS_KEY = '@lantern/bookmarks-v1';
 const SETTINGS_KEY = '@lantern/settings-v1';
+const BACKGROUND_KEY = '@lantern/background-v1';
+const MAX_BACKGROUND_CHARS = 1500000;
 const DEFAULT_SETTINGS = {
   searchEngine: 'DuckDuckGo',
   preferHttps: true,
   javaScriptEnabled: true,
   allowPopups: false,
+  privateBrowsing: false,
   showDailyVerse: true,
   verseTranslation: 'KJV',
-  backgroundImage: null,
 };
 const SEARCH_ENGINES = {
   DuckDuckGo: 'https://duckduckgo.com/?q=',
@@ -102,7 +105,7 @@ const DAILY_VERSES = [
 function makeTarget(value, engine, preferHttps) {
   const input = value.trim();
   if (!input) return null;
-  if (/^![a-z0-9]+(?:\\s|$)/i.test(input)) {
+  if (/^![a-z0-9]+(?:\s|$)/i.test(input)) {
     return SEARCH_ENGINES.DuckDuckGo + encodeURIComponent(input);
   }
   if (/^https?:\/\//i.test(input)) {
@@ -155,6 +158,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [background, setBackground] = useState(null);
+  const [webKey, setWebKey] = useState(0);
   const [bookmarksVisible, setBookmarksVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [editorVisible, setEditorVisible] = useState(false);
@@ -165,18 +170,47 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([AsyncStorage.getItem(BOOKMARKS_KEY), AsyncStorage.getItem(SETTINGS_KEY)])
-      .then(([savedBookmarks, savedSettings]) => {
+    Promise.all([
+      AsyncStorage.getItem(BOOKMARKS_KEY),
+      AsyncStorage.getItem(SETTINGS_KEY),
+      AsyncStorage.getItem(BACKGROUND_KEY),
+    ])
+      .then(([savedBookmarks, savedSettings, savedBackground]) => {
         if (!active) return;
         if (savedBookmarks) {
           try { setBookmarks(JSON.parse(savedBookmarks)); } catch (_) { setBookmarks([]); }
         }
+        let oldBackground = null;
         if (savedSettings) {
-          try { setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) }); } catch (_) {}
+          try {
+            const parsed = JSON.parse(savedSettings);
+            oldBackground = parsed.backgroundImage || null;
+            delete parsed.backgroundImage;
+            setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+          } catch (_) {}
+        }
+        if (savedBackground) {
+          setBackground(savedBackground);
+        } else if (oldBackground && oldBackground.length <= MAX_BACKGROUND_CHARS) {
+          setBackground(oldBackground);
+          AsyncStorage.setItem(BACKGROUND_KEY, oldBackground).catch(() => {});
         }
       })
       .catch(() => {});
     return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    const open = (link) => {
+      if (link && /^https?:\/\//i.test(link)) {
+        setAddress(link);
+        setUrl(link);
+        setPageTitle('');
+      }
+    };
+    Linking.getInitialURL().then(open).catch(() => {});
+    const sub = Linking.addEventListener('url', (event) => open(event.url));
+    return () => sub.remove();
   }, []);
 
   useEffect(() => {
@@ -210,6 +244,16 @@ export default function App() {
     try { await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch (_) {}
   };
 
+  const saveBackground = async (value) => {
+    try {
+      if (value) await AsyncStorage.setItem(BACKGROUND_KEY, value);
+      else await AsyncStorage.removeItem(BACKGROUND_KEY);
+      setBackground(value);
+    } catch (_) {
+      Alert.alert('Could not save the background', 'The photo may be too large. Try a different photo.');
+    }
+  };
+
   const navigate = (value = address) => {
     const target = makeTarget(value, settings.searchEngine, settings.preferHttps);
     if (!target) {
@@ -219,6 +263,21 @@ export default function App() {
     setAddress(target);
     setUrl(target);
     setPageTitle('');
+  };
+
+  const guardRequest = (request) => {
+    const next = request.url;
+    if (next === 'about:blank') return true;
+    if (!/^https?:\/\//i.test(next)) return false;
+    if (settings.preferHttps && /^http:\/\//i.test(next)) {
+      if (request.isTopFrame !== false) {
+        const upgraded = next.replace(/^http:\/\//i, 'https://');
+        setAddress(upgraded);
+        setUrl(upgraded);
+      }
+      return false;
+    }
+    return true;
   };
 
   const goHome = () => {
@@ -283,11 +342,16 @@ export default function App() {
         mediaTypes: ['images'],
         allowsEditing: true,
         base64: true,
-        quality: 0.55,
+        quality: 0.4,
       });
       const image = result.assets && result.assets[0];
       if (!result.canceled && image?.base64) {
-        await updateSetting('backgroundImage', 'data:image/jpeg;base64,' + image.base64);
+        const data = 'data:image/jpeg;base64,' + image.base64;
+        if (data.length > MAX_BACKGROUND_CHARS) {
+          Alert.alert('That photo is too large', 'Choose a smaller photo or crop it more tightly.');
+          return;
+        }
+        await saveBackground(data);
       }
     } catch (_) {
       Alert.alert('Could not set background', 'Please choose another photo and try again.');
@@ -295,14 +359,19 @@ export default function App() {
   };
 
   const clearBrowserData = () => {
-    Alert.alert('Clear cached pages?', 'This clears cached website files and the current browser history. Your saved pages stay in Lantern.', [
+    const message = Platform.OS === 'android'
+      ? 'This clears cached website files and the current browser history. Your saved pages stay in Lantern.'
+      : 'This closes the current page and its history. To avoid keeping cookies and site data on iPhone, turn on Private browsing. Your saved pages stay in Lantern.';
+    Alert.alert('Clear browsing history?', message, [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Clear cache',
+        text: 'Clear',
         style: 'destructive',
         onPress: () => {
-          web.current?.clearCache(true);
-          web.current?.clearHistory();
+          const view = web.current;
+          if (view && typeof view.clearCache === 'function') view.clearCache(true);
+          if (view && typeof view.clearHistory === 'function') view.clearHistory();
+          setWebKey((key) => key + 1);
           setAddress('');
           setUrl(null);
         },
@@ -334,7 +403,7 @@ export default function App() {
             accessibilityRole="link"
             accessibilityLabel={'Read ' + dailyVerse.reference + ' in ' + settings.verseTranslation + ' on BibleGateway'}
           >
-            <Text style={styles.verseSourceText}>Open {settings.verseTranslation} in BibleGateway ↗</Text>
+            <Text style={styles.verseSourceText}>Read in {settings.verseTranslation} on BibleGateway ↗</Text>
           </Pressable>
         </View>
       )}
@@ -386,12 +455,12 @@ export default function App() {
 
   return (
     <ImageBackground
-      source={settings.backgroundImage ? { uri: settings.backgroundImage } : undefined}
+      source={background ? { uri: background } : undefined}
       style={styles.root}
       imageStyle={styles.backgroundImageStyle}
       resizeMode="cover"
     >
-    <SafeAreaView style={styles.safeRoot}>
+    <SafeAreaView style={[styles.safeRoot, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight || 0 }]}>
       <NativeStatusBar barStyle="light-content" backgroundColor="#0b1220" />
       <View style={styles.header}>
         <View style={styles.brand}>
@@ -420,13 +489,13 @@ export default function App() {
           onSubmitEditing={() => navigate()}
           autoCapitalize="none"
           autoCorrect={false}
-          keyboardType="url"
+          keyboardType={Platform.OS === 'ios' ? 'web-search' : 'default'}
           returnKeyType="search"
           selectTextOnFocus
           placeholder="Search or try !w / !yt"
           placeholderTextColor="#8995aa"
           style={styles.addressInput}
-          accessibilityLabel="Search DuckDuckGo or enter a website"
+          accessibilityLabel="Search or enter a website"
         />
         <Pressable onPress={() => navigate()} style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
           <Text style={styles.searchButtonText}>Go</Text>
@@ -450,17 +519,20 @@ export default function App() {
       {loading && <ActivityIndicator color="#e5ad62" style={styles.progress} />}
       {url ? (
         <WebView
+          key={webKey + (settings.privateBrowsing ? '-p' : '-n')}
           ref={web}
           source={{ uri: url }}
+          incognito={settings.privateBrowsing}
           onLoadStart={() => setLoading(true)}
           onLoadEnd={() => setLoading(false)}
           onNavigationStateChange={(state) => {
             if (state.url) setAddress(state.url);
             if (state.title) setPageTitle(state.title);
           }}
-          onShouldStartLoadWithRequest={(request) => request.url === 'about:blank' || /^https?:\/\//i.test(request.url)}
+          onShouldStartLoadWithRequest={guardRequest}
           javaScriptEnabled={settings.javaScriptEnabled}
           domStorageEnabled
+          javaScriptCanOpenWindowsAutomatically={settings.allowPopups}
           setSupportMultipleWindows={settings.allowPopups}
           allowFileAccess={false}
           allowUniversalAccessFromFileURLs={false}
@@ -583,13 +655,13 @@ export default function App() {
                 <Pressable onPress={chooseBackground} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
                   <Text style={styles.backgroundActionText}>Choose photo</Text>
                 </Pressable>
-                <Pressable onPress={() => updateSetting('backgroundImage', null)} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
+                <Pressable onPress={() => saveBackground(null)} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
                   <Text style={styles.backgroundActionText}>Reset</Text>
                 </Pressable>
               </View>
 
               <Text style={styles.settingsSectionTitle}>Bible translation</Text>
-              <Text style={styles.settingsIntro}>Choose the translation opened on BibleGateway when you tap the verse link.</Text>
+              <Text style={styles.settingsIntro}>Choose the translation opened on BibleGateway when you tap the verse link. The verse on your home screen is from the World English Bible.</Text>
               <View style={styles.engineOptions}>
                 {['KJV', 'NIV', 'NASB'].map((translation) => (
                   <Pressable
@@ -620,26 +692,36 @@ export default function App() {
 
               <Text style={styles.settingsSectionTitle}>Security</Text>
               <View style={styles.settingsCard}>
-                <SettingRow title="Prefer secure connections" detail="Use HTTPS for typed sites and block insecure mixed content." value={settings.preferHttps} onValueChange={(value) => updateSetting('preferHttps', value)} />
+                <SettingRow title="Prefer secure connections" detail="Upgrade http links to https, including links you tap, and block insecure mixed content." value={settings.preferHttps} onValueChange={(value) => updateSetting('preferHttps', value)} />
                 <View style={styles.settingDivider} />
                 <SettingRow title="JavaScript" detail="Many sites need this to work. Turn it off for a stricter, simpler session." value={settings.javaScriptEnabled} onValueChange={(value) => updateSetting('javaScriptEnabled', value)} />
                 <View style={styles.settingDivider} />
                 <SettingRow title="Allow pop-up windows" detail="Keep pop-ups blocked unless a site you trust needs them." value={settings.allowPopups} onValueChange={(value) => updateSetting('allowPopups', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Private browsing" detail="Don’t keep cookies or site data after you close Lantern." value={settings.privateBrowsing} onValueChange={(value) => updateSetting('privateBrowsing', value)} />
               </View>
 
               <View style={styles.privacyNote}>
                 <Text style={styles.privacyNoteMark}>✦</Text>
                 <View style={styles.privacyNoteCopy}>
                   <Text style={styles.privacyNoteTitle}>Built for a little more privacy</Text>
-                  <Text style={styles.privacyNoteBody}>Lantern blocks local-file access and third-party cookies. Search stays with your selected provider.</Text>
+                  <Text style={styles.privacyNoteBody}>
+                    {Platform.OS === 'android'
+                      ? 'Lantern blocks local-file access and third-party cookies. Search stays with your selected provider.'
+                      : 'Lantern blocks local-file access. On iPhone, turn on Private browsing to avoid keeping cookies and site data. Search stays with your selected provider.'}
+                  </Text>
                 </View>
               </View>
 
               <Text style={styles.settingsSectionTitle}>Browsing data</Text>
-              <Text style={styles.settingsIntro}>Clear cached site files and the current browser history. Saved pages are kept.</Text>
+              <Text style={styles.settingsIntro}>
+                {Platform.OS === 'android'
+                  ? 'Clear cached site files and the current browser history. Saved pages are kept.'
+                  : 'Close the current page and clear its history. Saved pages are kept.'}
+              </Text>
               <Pressable onPress={clearBrowserData} style={({ pressed }) => [styles.clearDataButton, pressed && styles.pressed]}>
                 <Text style={styles.clearDataGlyph}>⌫</Text>
-                <Text style={styles.clearDataText}>Clear cache and history</Text>
+                <Text style={styles.clearDataText}>{Platform.OS === 'android' ? 'Clear cache and history' : 'Clear history'}</Text>
               </Pressable>
             </ScrollView>
           </View>
@@ -658,13 +740,13 @@ const styles = StyleSheet.create({
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 },
   brandIcon: { width: 42, height: 42, borderRadius: 12 },
   brandName: { color: '#f7f4ee', fontSize: 21, fontWeight: '800', letterSpacing: 0.2 },
-  brandTagline: { color: '#8995aa', fontSize: 11, marginTop: 1 },
+  brandTagline: { color: '#8995aa', fontSize: 12, marginTop: 1 },
   headerActions: { flexDirection: 'row', gap: 4 },
   headerAction: { alignItems: 'center', justifyContent: 'center', minWidth: 48, paddingHorizontal: 5, paddingVertical: 4 },
   headerActionGlyph: { color: '#e6b366', fontSize: 19, height: 22 },
-  headerActionText: { color: '#bac4d5', fontSize: 10, fontWeight: '600' },
+  headerActionText: { color: '#bac4d5', fontSize: 11, fontWeight: '600' },
   searchRow: { flexDirection: 'row', marginHorizontal: 16, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, borderRadius: 16, padding: 5, gap: 5, alignItems: 'center' },
-  addressInput: { flex: 1, minWidth: 0, paddingHorizontal: 12, paddingVertical: 11, color: '#f3f5f8', fontSize: 14 },
+  addressInput: { flex: 1, minWidth: 0, paddingHorizontal: 12, paddingVertical: 11, color: '#f3f5f8', fontSize: 15 },
   searchButton: { backgroundColor: '#e6ad60', borderRadius: 12, paddingHorizontal: 17, paddingVertical: 11, minWidth: 58, alignItems: 'center' },
   searchButtonText: { color: '#192235', fontWeight: '800', fontSize: 14 },
   navRow: { minHeight: 50, paddingHorizontal: 18, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -674,47 +756,46 @@ const styles = StyleSheet.create({
   iconGlyphSecondary: { color: '#e4ac5e' },
   saveCurrentButton: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#394862', borderRadius: 13, paddingHorizontal: 12, paddingVertical: 9, gap: 5 },
   saveCurrentGlyph: { color: '#e4ac5e', fontSize: 18, lineHeight: 20 },
-  saveCurrentText: { color: '#dbe2ed', fontSize: 12, fontWeight: '700' },
+  saveCurrentText: { color: '#dbe2ed', fontSize: 13, fontWeight: '700' },
   searchHint: { flex: 1, alignItems: 'flex-end', paddingRight: 1 },
-  searchHintText: { color: '#8190a8', fontSize: 11 },
+  searchHintText: { color: '#8190a8', fontSize: 12 },
   progress: { height: 3 },
   homeScroll: { flex: 1 },
   homeContent: { paddingHorizontal: 18, paddingBottom: 30 },
   welcomeBlock: { paddingTop: 14, paddingBottom: 16 },
-  eyebrow: { color: '#e7b366', fontSize: 10, fontWeight: '800', letterSpacing: 1.6, marginBottom: 9 },
+  eyebrow: { color: '#e7b366', fontSize: 11, fontWeight: '800', letterSpacing: 1.6, marginBottom: 9 },
   welcomeTitle: { color: '#f7f4ee', fontSize: 31, fontWeight: '700', letterSpacing: -0.7, lineHeight: 37 },
   welcomeBody: { color: '#9aa7bb', fontSize: 14, marginTop: 8 },
   verseCard: { backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, borderRadius: 20, padding: 13, marginTop: 2 },
   verseTopline: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 2, paddingBottom: 9 },
   verseLabelWrap: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   verseSpark: { color: '#e8b76d', fontSize: 15 },
-  verseLabel: { color: '#f4e7cf', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
-  verseReference: { color: '#e8b76d', fontSize: 10, fontWeight: '800', letterSpacing: 0.6 },
-  verseText: { color: '#f4f0e7', fontSize: 14, lineHeight: 21, paddingHorizontal: 5, paddingVertical: 8 },
-  verseSourceButton: { alignSelf: 'flex-start', marginTop: 5, paddingHorizontal: 5, paddingVertical: 3 },
-  verseSourceText: { color: '#e8b76d', fontSize: 11, fontWeight: '700' },
-  verseImage: { width: '100%', height: 88, backgroundColor: '#10192b', borderRadius: 12 },
+  verseLabel: { color: '#f4e7cf', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  verseReference: { color: '#e8b76d', fontSize: 11, fontWeight: '800', letterSpacing: 0.6 },
+  verseText: { color: '#f4f0e7', fontSize: 15, lineHeight: 22, paddingHorizontal: 5, paddingVertical: 8 },
+  verseSourceButton: { alignSelf: 'flex-start', marginTop: 5, paddingHorizontal: 5, paddingVertical: 6 },
+  verseSourceText: { color: '#e8b76d', fontSize: 13, fontWeight: '700' },
   sectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 21, marginBottom: 10 },
   sectionTitle: { color: '#f2f3f5', fontSize: 16, fontWeight: '700' },
-  sectionHint: { color: '#8190a8', fontSize: 11 },
-  seeAll: { color: '#e8b76d', fontWeight: '700', fontSize: 12 },
+  sectionHint: { color: '#8190a8', fontSize: 12 },
+  seeAll: { color: '#e8b76d', fontWeight: '700', fontSize: 13 },
   homeBookmarkActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   bookmarkEmptyHome: { borderWidth: 1, borderColor: '#293752', borderStyle: 'dashed', borderRadius: 14, padding: 14, marginBottom: 8 },
   bookmarkEmptyText: { color: '#aab6c9', fontSize: 12, textAlign: 'center' },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
-  quickCard: { width: '48%', minHeight: 65, flexDirection: 'row', alignItems: 'center', backgroundColor: '#121c2f', borderWidth: 1, borderColor: '#202d43', borderRadius: 15, paddingHorizontal: 10, paddingVertical: 9, gap: 8 },
+  quickCard: { width: '48%', minHeight: 72, flexDirection: 'row', alignItems: 'center', backgroundColor: '#121c2f', borderWidth: 1, borderColor: '#202d43', borderRadius: 15, paddingHorizontal: 10, paddingVertical: 9, gap: 8 },
   quickMark: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   quickMarkText: { fontWeight: '800', fontSize: 16 },
   quickCopy: { flex: 1, minWidth: 0 },
-  quickTitle: { color: '#e9edf4', fontSize: 11, fontWeight: '700' },
-  quickSubtitle: { color: '#7f8ca2', fontSize: 10, marginTop: 3 },
+  quickTitle: { color: '#e9edf4', fontSize: 13, fontWeight: '700' },
+  quickSubtitle: { color: '#7f8ca2', fontSize: 12, marginTop: 3 },
   quickArrow: { color: '#75849d', fontSize: 19 },
   savedHomeRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 13, padding: 10, marginBottom: 7, backgroundColor: '#121c2f' },
   savedHomeMark: { width: 30, height: 30, borderRadius: 10, textAlign: 'center', textAlignVertical: 'center', color: '#e8b76d', backgroundColor: '#26334b', overflow: 'hidden', fontSize: 16 },
   savedHomeCopy: { flex: 1 },
-  savedHomeTitle: { color: '#e8edf5', fontSize: 12, fontWeight: '700' },
-  savedHomeUrl: { color: '#8090a6', fontSize: 10, marginTop: 2 },
-  footerNote: { color: '#64738a', fontSize: 9, letterSpacing: 1.1, textAlign: 'center', marginTop: 20 },
+  savedHomeTitle: { color: '#e8edf5', fontSize: 13, fontWeight: '700' },
+  savedHomeUrl: { color: '#8090a6', fontSize: 12, marginTop: 2 },
+  footerNote: { color: '#64738a', fontSize: 11, letterSpacing: 1.1, textAlign: 'center', marginTop: 20 },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(3,8,17,0.7)', justifyContent: 'flex-end' },
   sheetKeyboard: { width: '100%' },
   sheet: { backgroundColor: '#111b2c', borderColor: '#28364d', borderWidth: 1, borderTopLeftRadius: 25, borderTopRightRadius: 25, paddingHorizontal: 20, paddingTop: 11, paddingBottom: 28, maxHeight: '88%' },
@@ -731,18 +812,18 @@ const styles = StyleSheet.create({
   bookmarkMark: { width: 34, height: 34, borderRadius: 11, backgroundColor: '#202d43', color: '#e8b76d', textAlign: 'center', textAlignVertical: 'center', overflow: 'hidden', fontSize: 16 },
   bookmarkCopy: { flex: 1, minWidth: 0 },
   bookmarkTitle: { color: '#edf0f4', fontSize: 13, fontWeight: '700' },
-  bookmarkUrl: { color: '#8795aa', fontSize: 10, marginTop: 3 },
+  bookmarkUrl: { color: '#8795aa', fontSize: 12, marginTop: 3 },
   bookmarkOrderActions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   orderButton: { minWidth: 28, minHeight: 34, alignItems: 'center', justifyContent: 'center' },
   orderButtonText: { color: '#aab6c9', fontSize: 16, fontWeight: '700' },
   editButton: { paddingVertical: 8, paddingHorizontal: 9 },
-  editButtonText: { color: '#e8b76d', fontWeight: '700', fontSize: 12 },
+  editButtonText: { color: '#e8b76d', fontWeight: '700', fontSize: 13 },
   emptyState: { alignItems: 'center', paddingHorizontal: 22, paddingVertical: 34 },
   emptyGlyph: { color: '#e8b76d', fontSize: 26, marginBottom: 7 },
   emptyTitle: { color: '#edf0f4', fontSize: 15, fontWeight: '700' },
   emptyText: { color: '#93a0b5', fontSize: 12, textAlign: 'center', lineHeight: 18, marginTop: 6 },
-  sheetFootnote: { color: '#708099', fontSize: 10, textAlign: 'center', marginTop: 11 },
-  fieldLabel: { color: '#9eabc0', fontSize: 10, letterSpacing: 1.1, fontWeight: '800', marginTop: 8, marginBottom: 7 },
+  sheetFootnote: { color: '#708099', fontSize: 12, textAlign: 'center', marginTop: 11 },
+  fieldLabel: { color: '#9eabc0', fontSize: 11, letterSpacing: 1.1, fontWeight: '800', marginTop: 8, marginBottom: 7 },
   fieldInput: { backgroundColor: '#172238', color: '#f2f4f7', borderColor: '#30405a', borderWidth: 1, borderRadius: 13, paddingHorizontal: 13, paddingVertical: 13, fontSize: 14 },
   primaryButton: { marginTop: 18, backgroundColor: '#e6ad60', borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
   primaryButtonText: { color: '#1a2435', fontSize: 14, fontWeight: '800' },
@@ -753,27 +834,27 @@ const styles = StyleSheet.create({
   settingsIntro: { color: '#92a0b6', fontSize: 12, lineHeight: 18, marginBottom: 10 },
   backgroundActions: { flexDirection: 'row', gap: 8, marginBottom: 17 },
   backgroundAction: { flex: 1, minHeight: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1 },
-  backgroundActionText: { color: '#e8edf4', fontSize: 12, fontWeight: '700' },
+  backgroundActionText: { color: '#e8edf4', fontSize: 13, fontWeight: '700' },
   engineOptions: { flexDirection: 'row', gap: 7, marginBottom: 17 },
   engineOption: { flex: 1, minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, paddingHorizontal: 4, gap: 4 },
   engineOptionSelected: { borderColor: '#e6ad60', backgroundColor: '#392f28' },
-  engineOptionText: { color: '#9ba8bc', fontSize: 10, fontWeight: '700' },
+  engineOptionText: { color: '#9ba8bc', fontSize: 12, fontWeight: '700' },
   engineOptionTextSelected: { color: '#ffe3b1' },
   engineCheck: { color: '#e6ad60', fontSize: 12, fontWeight: '800' },
   settingsCard: { backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, borderRadius: 16, paddingHorizontal: 13, marginBottom: 16 },
-  settingRow: { flexDirection: 'row', alignItems: 'center', minHeight: 69, paddingVertical: 10, gap: 10 },
+  settingRow: { flexDirection: 'row', alignItems: 'center', minHeight: 72, paddingVertical: 10, gap: 10 },
   settingCopy: { flex: 1 },
-  settingTitle: { color: '#e7ebf1', fontSize: 12, fontWeight: '700' },
-  settingDetail: { color: '#8694aa', fontSize: 10, lineHeight: 14, marginTop: 4 },
+  settingTitle: { color: '#e7ebf1', fontSize: 14, fontWeight: '700' },
+  settingDetail: { color: '#8694aa', fontSize: 12, lineHeight: 17, marginTop: 4 },
   settingDivider: { height: 1, backgroundColor: '#2b3850' },
   privacyNote: { flexDirection: 'row', gap: 11, backgroundColor: '#142b2e', borderColor: '#244849', borderWidth: 1, borderRadius: 15, padding: 13, marginBottom: 17 },
   privacyNoteMark: { color: '#80c4a5', fontSize: 18 },
   privacyNoteCopy: { flex: 1 },
-  privacyNoteTitle: { color: '#d9f0e4', fontSize: 12, fontWeight: '700' },
-  privacyNoteBody: { color: '#98b9aa', fontSize: 10, lineHeight: 15, marginTop: 4 },
+  privacyNoteTitle: { color: '#d9f0e4', fontSize: 13, fontWeight: '700' },
+  privacyNoteBody: { color: '#98b9aa', fontSize: 12, lineHeight: 18, marginTop: 4 },
   clearDataButton: { flexDirection: 'row', alignItems: 'center', gap: 9, borderRadius: 13, borderColor: '#553b43', borderWidth: 1, backgroundColor: '#2b202b', padding: 13, marginBottom: 12 },
   clearDataGlyph: { color: '#e58c87', fontSize: 16 },
-  clearDataText: { color: '#ecc4bf', fontSize: 12, fontWeight: '700' },
+  clearDataText: { color: '#ecc4bf', fontSize: 13, fontWeight: '700' },
   pressed: { opacity: 0.72 },
   web: { flex: 1, backgroundColor: '#ffffff' },
 });
