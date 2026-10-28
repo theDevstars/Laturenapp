@@ -9,7 +9,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourname.lantern",
-      "buildNumber": "10"
+      "buildNumber": "10",
+      "infoPlist": {
+        "CFBundleDisplayName": "Saturn"
+      }
     },
     "android": {
       "package": "com.yourname.lantern",
@@ -30,13 +33,14 @@
           ]
         }
       ],
-      "versionCode": 10
+      "versionCode": 10,
+      "label": "Saturn"
     },
     "plugins": [
       [
         "expo-image-picker",
         {
-          "photosPermission": "Choose a wallpaper for Lantern."
+          "photosPermission": "Choose a wallpaper for Saturn."
         }
       ]
     ]
