@@ -490,7 +490,7 @@ export default function App() {
   const clearBrowserData = () => {
     const message = Platform.OS === 'android'
       ? 'This clears cached website files and the current browser history. Your saved pages stay in Lantern.'
-      : 'This closes the current page and its history. To avoid keeping cookies and site data on iPhone, turn on Private browsing. Your saved pages stay in Lantern.';
+      : 'This closes the current page and clears the WebView history. Private-session cookie and site-data behavior can vary by iOS version. Your saved pages stay in Lantern.';
     Alert.alert('Clear browsing history?', message, [
       { text: 'Cancel', style: 'cancel' },
       {
