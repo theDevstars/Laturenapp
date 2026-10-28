@@ -323,7 +323,7 @@ export default function App() {
             accessibilityRole="link"
             accessibilityLabel={'Read ' + dailyVerse.reference + ' in ' + settings.verseTranslation + ' on BibleGateway'}
           >
-            <Text style={styles.verseSourceText}>Read in {settings.verseTranslation} on BibleGateway ↗</Text>
+            <Text style={styles.verseSourceText}>Open {settings.verseTranslation} in BibleGateway ↗</Text>
           </Pressable>
         </View>
       )}
