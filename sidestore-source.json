@@ -17,12 +17,12 @@
       "category": "utilities",
       "versions": [
         {
-          "version": "1.0.9",
-          "buildVersion": "9",
-          "date": "2026-10-28T00:40:00Z",
-          "localizedDescription": "Lantern browser update with daily verse and DuckDuckGo home.",
-          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/lantern-v1.0.9/Lantern-unsigned.ipa",
-          "size": 6474874
+          "version": "1.0.10",
+          "buildVersion": "10",
+          "date": "2026-10-28T00:50:22.372Z",
+          "localizedDescription": "Lantern browser update.",
+          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/lantern-v1.0.10/Lantern-unsigned.ipa",
+          "size": 6474875
         }
       ],
       "appPermissions": {
