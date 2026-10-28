@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07132d"/><stop offset="1" stop-color="#01040d"/></linearGradient>
+ <linearGradient id="planet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff4cf"/><stop offset=".38" stop-color="#e5b96d"/><stop offset=".7" stop-color="#88603c"/><stop offset="1" stop-color="#243a69"/></linearGradient>
+ <linearGradient id="ring" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff1bc"/><stop offset=".35" stop-color="#d49b4e"/><stop offset=".65" stop-color="#fbe2a0"/><stop offset="1" stop-color="#a66d36"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#fff4ce" stop-opacity=".7"/><stop offset="1" stop-color="#fff4ce" stop-opacity="0"/></radialGradient>
+ <clipPath id="planetClip"><circle cx="512" cy="440" r="220"/></clipPath>
+</defs>
+<rect width="1024" height="1024" rx="190" fill="url(#bg)"/>
+<circle cx="800" cy="205" r="70" fill="url(#glow)"/><path d="M800 172v66M767 205h66M777 182l46 46M823 182l-46 46" stroke="#ffe3a0" stroke-width="3"/>
+<g fill="#fff"><circle cx="230" cy="210" r="5"/><circle cx="838" cy="400" r="4"/><circle cx="200" cy="590" r="4"/><circle cx="750" cy="700" r="5"/><circle cx="300" cy="730" r="3"/></g>
+<ellipse cx="512" cy="465" rx="360" ry="126" transform="rotate(18 512 465)" fill="none" stroke="#ffc96f" stroke-width="28" opacity=".9"/>
+<ellipse cx="512" cy="465" rx="360" ry="126" transform="rotate(18 512 465)" fill="none" stroke="url(#ring)" stroke-width="20"/>
+<ellipse cx="512" cy="465" rx="295" ry="96" transform="rotate(18 512 465)" fill="none" stroke="#16223d" stroke-width="22"/>
+<circle cx="512" cy="440" r="220" fill="url(#planet)"/>
+<g clip-path="url(#planetClip)" opacity=".55"><path d="M270 300h500M260 340h520M250 385h540M250 430h540M260 475h520M270 520h500M290 565h460" stroke="#fff0c1" stroke-width="16" opacity=".5"/><path d="M270 365h500M270 455h500M285 545h460" stroke="#65482e" stroke-width="12" opacity=".5"/></g>
+<path d="M178 385c150 90 345 176 552 193" fill="none" stroke="#ffdf91" stroke-width="10" opacity=".85"/>
+<text x="512" y="835" font-family="Arial,Helvetica,sans-serif" font-size="116" font-weight="700" text-anchor="middle" fill="#fffdf7">Saturn</text>
+</svg>
