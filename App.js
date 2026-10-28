@@ -34,6 +34,7 @@ const DEFAULT_SETTINGS = {
   allowPopups: false,
   privateBrowsing: false,
   showDailyVerse: true,
+  quickPaths: { DuckDuckGo: false, YouTube: false, Wikipedia: false, 'Bible Gateway': false },
   verseTranslation: 'web',
   bibleKey: '',
 };
@@ -275,7 +276,7 @@ export default function App() {
             const saved = parsed.verseTranslation;
             if (legacy[saved]) parsed.verseTranslation = legacy[saved];
             else if (saved && !TRANSLATIONS.some((item) => item.id === saved) && String(saved).indexOf('api:') !== 0) parsed.verseTranslation = 'web';
-            setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+            setSettings({ ...DEFAULT_SETTINGS, ...parsed, quickPaths: { ...DEFAULT_SETTINGS.quickPaths, ...(parsed.quickPaths || {}) } });
           } catch (_) {}
         }
         if (savedBackground) {
@@ -552,24 +553,28 @@ export default function App() {
         </View>
       )}
 
-      <View style={styles.sectionHeading}>
-        <Text style={styles.sectionTitle}>Quick paths</Text>
-        <Text style={styles.sectionHint}>A few good places to begin</Text>
-      </View>
-      <View style={styles.quickGrid}>
-        {QUICK_LINKS.map((item) => (
-          <Pressable key={item.title} onPress={() => navigate(item.url)} style={({ pressed }) => [styles.quickCard, pressed && styles.pressed]}>
-            <View style={[styles.quickMark, { backgroundColor: item.color + '24' }]}>
-              <Text style={[styles.quickMarkText, { color: item.color }]}>{item.mark}</Text>
-            </View>
-            <View style={styles.quickCopy}>
-              <Text style={styles.quickTitle}>{item.title}</Text>
-              <Text style={styles.quickSubtitle}>{item.subtitle}</Text>
-            </View>
-            <Text style={styles.quickArrow}>›</Text>
-          </Pressable>
-        ))}
-      </View>
+      {QUICK_LINKS.some((item) => settings.quickPaths && settings.quickPaths[item.title]) && (
+        <>
+          <View style={styles.sectionHeading}>
+            <Text style={styles.sectionTitle}>Quick paths</Text>
+            <Text style={styles.sectionHint}>A few good places to begin</Text>
+          </View>
+          <View style={styles.quickGrid}>
+            {QUICK_LINKS.filter((item) => settings.quickPaths && settings.quickPaths[item.title]).map((item) => (
+              <Pressable key={item.title} onPress={() => navigate(item.url)} style={({ pressed }) => [styles.quickCard, pressed && styles.pressed]}>
+                <View style={[styles.quickMark, { backgroundColor: item.color + '24' }]}>
+                  <Text style={[styles.quickMarkText, { color: item.color }]}>{item.mark}</Text>
+                </View>
+                <View style={styles.quickCopy}>
+                  <Text style={styles.quickTitle}>{item.title}</Text>
+                  <Text style={styles.quickSubtitle}>{item.subtitle}</Text>
+                </View>
+                <Text style={styles.quickArrow}>›</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      )}
 
       <View style={styles.sectionHeading}>
         <Text style={styles.sectionTitle}>Your bookmarks</Text>
@@ -791,6 +796,22 @@ export default function App() {
                   value={settings.showDailyVerse}
                   onValueChange={(value) => updateSetting('showDailyVerse', value)}
                 />
+              </View>
+
+              <Text style={styles.settingsSectionTitle}>Quick paths</Text>
+              <Text style={styles.settingsIntro}>Turn each shortcut on or off. All are hidden by default.</Text>
+              <View style={styles.settingsCard}>
+                {QUICK_LINKS.map((item, index) => (
+                  <React.Fragment key={item.title}>
+                    {index > 0 && <View style={styles.settingDivider} />}
+                    <SettingRow
+                      title={item.title}
+                      detail={'Show ' + item.title + ' on the Lantern home screen.'}
+                      value={!!(settings.quickPaths && settings.quickPaths[item.title])}
+                      onValueChange={(value) => updateSetting('quickPaths', { ...(settings.quickPaths || DEFAULT_SETTINGS.quickPaths), [item.title]: value })}
+                    />
+                  </React.Fragment>
+                ))}
               </View>
 
               <Text style={styles.settingsSectionTitle}>Home background</Text>
