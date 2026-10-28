@@ -1,0 +1,37 @@
+{
+  "name": "Lantern",
+  "subtitle": "A calmer web browser",
+  "description": "Lantern for iPhone and iPad. Updates are published with each GitHub release.",
+  "iconURL": "https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png",
+  "website": "https://github.com/theDevstars/Laturenapp",
+  "tintColor": "#DDAF64",
+  "apps": [
+    {
+      "name": "Lantern",
+      "bundleIdentifier": "com.yourname.lantern",
+      "developerName": "theDevstars",
+      "subtitle": "Browse with a little more calm",
+      "localizedDescription": "Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.",
+      "iconURL": "https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png",
+      "tintColor": "#DDAF64",
+      "category": "utilities",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "buildVersion": "1",
+          "date": "2026-10-28T00:00:00Z",
+          "localizedDescription": "First SideStore source release.",
+          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/lantern-v1.0.8/Lantern-unsigned.ipa",
+          "size": 6474854
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSPhotoLibraryUsageDescription": "Choose a wallpaper for Lantern."
+        }
+      }
+    }
+  ],
+  "news": []
+}
