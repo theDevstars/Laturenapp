@@ -2,7 +2,7 @@ name: Build Saturn IPA, APK and EXE
 
 concurrency:
   group: lantern-build-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   workflow_dispatch:
@@ -57,13 +57,12 @@ jobs:
       - name: Package IPA
         run: |
           echo "Searching for the built iOS app bundle..."
-          echo "Searching for the built iOS app bundle..."
-          APP_PATH=$(find ios -type d -name '*.app' -not -path '*/Index.noindex/*' -print -quit 2>/dev/null)
+          APP_PATH=$(find ios -type d -name '*.app' -not -path '*/Index.noindex/*' -not -path '*/Pods/*' -print -quit 2>/dev/null || true)
           if [ -z "$APP_PATH" ] || [ ! -d "$APP_PATH" ]; then
-            echo "ERROR: No .app bundle was found under ios/."
-            echo "Searching the repository for app bundles and showing build output:"
-            find . -type d -name '*.app' -not -path './node_modules/*' -not -path './.git/*' -print 2>/dev/null | head -50 || true
-            find ios -maxdepth 6 -type d -print 2>/dev/null | tail -100 || true
+            echo "ERROR: No .app bundle was found. Xcode build products:"
+            find . -type d -name '*.app' -not -path '*/Index.noindex/*' -not -path '*/Pods/*' -not -path './node_modules/*' -not -path './.git/*' -print 2>/dev/null | head -100 || true
+            echo "Relevant build directories:"
+            find ios -maxdepth 7 -type d -name Products -o -name Release-iphoneos -o -name build 2>/dev/null | head -100 || true
             exit 1
           fi
           echo "Packaging app bundle: $APP_PATH"
