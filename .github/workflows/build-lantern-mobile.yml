@@ -24,6 +24,11 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Set native app version for this build
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          node -e "const fs=require('fs'); const p='app.json'; const config=JSON.parse(fs.readFileSync(p,'utf8')); const build=process.env.BUILD_NUMBER; config.expo.version='1.0.'+build; config.expo.ios={...config.expo.ios,buildNumber:build}; config.expo.android={...config.expo.android,versionCode:Number(build)}; fs.writeFileSync(p,JSON.stringify(config,null,2)+'\\n');"
       - name: Generate iOS project
         run: npx expo prebuild --platform ios --non-interactive
       - name: Build iOS app
@@ -59,6 +64,11 @@ jobs:
           java-version: 17
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Set native app version for this build
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          node -e "const fs=require('fs'); const p='app.json'; const config=JSON.parse(fs.readFileSync(p,'utf8')); const build=process.env.BUILD_NUMBER; config.expo.version='1.0.'+build; config.expo.ios={...config.expo.ios,buildNumber:build}; config.expo.android={...config.expo.android,versionCode:Number(build)}; fs.writeFileSync(p,JSON.stringify(config,null,2)+'\\n');"
       - name: Generate Android project
         run: npx expo prebuild --platform android --non-interactive
       - name: Build APK
@@ -131,3 +141,13 @@ jobs:
             - iOS IPA: unsigned build; standard iPhone installation requires Apple code signing.
           prerelease: true
           files: release-files/*
+      - name: Update SideStore source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_NUMBER: ${{ github.run_number }}
+          RELEASE_TAG: lantern-v1.0.${{ github.run_number }}
+        run: |
+          IPA_SIZE=$(stat -c%s release-files/Lantern-unsigned.ipa)
+          node -e "const fs=require('fs'); const build=process.env.BUILD_NUMBER; const tag=process.env.RELEASE_TAG; const source={name:'Lantern',subtitle:'A calmer web browser',description:'Lantern for iPhone and iPad. Updates are published with each GitHub release.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',website:'https://github.com/theDevstars/Laturenapp',tintColor:'#DDAF64',apps:[{name:'Lantern',bundleIdentifier:'com.yourname.lantern',developerName:'theDevstars',subtitle:'Browse with a little more calm',localizedDescription:'Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',tintColor:'#DDAF64',category:'utilities',versions:[{version:'1.0.'+build,buildVersion:build,date:new Date().toISOString(),localizedDescription:'Lantern browser update.',downloadURL:'https://github.com/theDevstars/Laturenapp/releases/download/'+tag+'/Lantern-unsigned.ipa',size:Number(process.env.IPA_SIZE)}],appPermissions:{entitlements:[],privacy:{NSPhotoLibraryUsageDescription:'Choose a wallpaper for Lantern.'}}}],news:[]};fs.writeFileSync('sidestore-source.json',JSON.stringify(source,null,2)+'\\n');"
+          echo "$GH_TOKEN" | gh auth login --with-token
+          gh api repos/theDevstars/Laturenapp/contents/sidestore-source.json --method PUT --field message="Update SideStore source for $RELEASE_TAG" --field content="$(base64 -w0 sidestore-source.json)" --field branch=main
