@@ -1,5 +1,9 @@
 name: Build Saturn IPA, APK and EXE
 
+concurrency:
+  group: lantern-build-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   push:
@@ -35,7 +39,11 @@ jobs:
         run: |
           node -e "const fs=require('fs'); const p='app.json'; const config=JSON.parse(fs.readFileSync(p,'utf8')); const build=process.env.BUILD_NUMBER; config.expo.version='1.0.'+build; config.expo.ios={...config.expo.ios,buildNumber:build}; config.expo.android={...config.expo.android,versionCode:Number(build)}; fs.writeFileSync(p,JSON.stringify(config,null,2)+'\\n');"
       - name: Generate iOS project
-        run: npx expo prebuild --platform ios --non-interactive
+        run: npx expo prebuild --platform ios --non-interactive --no-install
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        timeout-minutes: 12
+        run: pod install
       - name: Build iOS app
         run: |
           cd ios
