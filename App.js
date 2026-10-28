@@ -25,6 +25,7 @@ import * as ImagePicker from 'expo-image-picker';
 const BOOKMARKS_KEY = '@lantern/bookmarks-v1';
 const SETTINGS_KEY = '@lantern/settings-v1';
 const BACKGROUND_KEY = '@lantern/background-v1';
+const BIBLES_KEY = '@lantern/api-bibles-v1';
 const MAX_BACKGROUND_CHARS = 1500000;
 const DEFAULT_SETTINGS = {
   searchEngine: 'DuckDuckGo',
@@ -33,7 +34,8 @@ const DEFAULT_SETTINGS = {
   allowPopups: false,
   privateBrowsing: false,
   showDailyVerse: true,
-  verseTranslation: 'KJV',
+  verseTranslation: 'web',
+  bibleKey: '',
 };
 const SEARCH_ENGINES = {
   DuckDuckGo: 'https://duckduckgo.com/?q=',
@@ -102,6 +104,83 @@ const DAILY_VERSES = [
   }
 ];
 
+const KJV_TEXT = {
+  'Psalm 91:1–2': 'He that dwelleth in the secret place of the most High\nshall abide under the shadow of the Almighty.\n\nI will say of the LORD, He is my refuge and my fortress:\nmy God; in him will I trust.',
+  'Psalm 23:1': 'The LORD is my shepherd;\nI shall not want.',
+  'Psalm 46:1': 'God is our refuge and strength,\na very present help in trouble.',
+  'Psalm 121:1–2': 'I will lift up mine eyes unto the hills,\nfrom whence cometh my help.\nMy help cometh from the LORD,\nwhich made heaven and earth.',
+  'Proverbs 3:5–6': 'Trust in the LORD with all thine heart;\nand lean not unto thine own understanding.\nIn all thy ways acknowledge him,\nand he shall direct thy paths.',
+  'Isaiah 41:10': 'Fear thou not; for I am with thee:\nbe not dismayed; for I am thy God:\nI will strengthen thee; yea, I will help thee;\nyea, I will uphold thee with the right hand of my righteousness.',
+  'Matthew 6:34': 'Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof.',
+  'Matthew 11:28': 'Come unto me, all ye that labour and are heavy laden, and I will give you rest.',
+  'John 14:27': 'Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.',
+  'Romans 8:28': 'And we know that all things work together for good to them that love God, to them who are the called according to his purpose.',
+  'Philippians 4:6–7': 'Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.',
+  'Joshua 1:9': 'Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.',
+  '1 Peter 5:7': 'Casting all your care upon him; for he careth for you.',
+};
+
+const TRANSLATIONS = [
+  { id: 'web', label: 'WEB' },
+  { id: 'kjv', label: 'KJV' },
+  { id: 'bbe', label: 'BBE' },
+  { id: 'oeb-us', label: 'OEB' },
+  { id: 'oeb-cw', label: 'OEB-CW' },
+  { id: 'webbe', label: 'WEBBE' },
+  { id: 'clementine', label: 'Latin' },
+  { id: 'almeida', label: 'Almeida' },
+  { id: 'rccv', label: 'Romanian' },
+];
+const OSIS = {
+  'Psalm 91:1–2': 'PSA.91.1-PSA.91.2',
+  'Psalm 23:1': 'PSA.23.1',
+  'Psalm 46:1': 'PSA.46.1',
+  'Psalm 121:1–2': 'PSA.121.1-PSA.121.2',
+  'Proverbs 3:5–6': 'PRO.3.5-PRO.3.6',
+  'Isaiah 41:10': 'ISA.41.10',
+  'Matthew 6:34': 'MAT.6.34',
+  'Matthew 11:28': 'MAT.11.28',
+  'John 14:27': 'JHN.14.27',
+  'Romans 8:28': 'ROM.8.28',
+  'Philippians 4:6–7': 'PHP.4.6-PHP.4.7',
+  'Joshua 1:9': 'JOS.1.9',
+  '1 Peter 5:7': '1PE.5.7',
+};
+
+async function loadVerse(id, reference, apiKey) {
+  const cacheKey = '@lantern/verse/' + id + '/' + reference;
+  try {
+    const cached = await AsyncStorage.getItem(cacheKey);
+    if (cached) return cached;
+  } catch (_) {}
+  let text = '';
+  try {
+    if (id.indexOf('api:') === 0) {
+      const osis = OSIS[reference];
+      if (!apiKey || !osis) return '';
+      const res = await fetch(
+        'https://api.scripture.api.bible/v1/bibles/' + id.slice(4) + '/passages/' + osis +
+          '?content-type=text&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=false',
+        { headers: { 'api-key': apiKey } }
+      );
+      if (!res.ok) return '';
+      const json = await res.json();
+      text = String((json.data && json.data.content) || '').replace(/[ \t]+/g, ' ').replace(/\n\s+/g, '\n').trim();
+    } else {
+      const res = await fetch('https://bible-api.com/' + reference.replace('–', '-').replace(/ /g, '+') + '?translation=' + id);
+      if (!res.ok) return '';
+      const json = await res.json();
+      text = String(json.text || '').trim();
+    }
+  } catch (_) {
+    return '';
+  }
+  if (text) {
+    try { await AsyncStorage.setItem(cacheKey, text); } catch (_) {}
+  }
+  return text;
+}
+
 function makeTarget(value, engine, preferHttps) {
   const input = value.trim();
   if (!input) return null;
@@ -160,6 +239,8 @@ export default function App() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [background, setBackground] = useState(null);
   const [webKey, setWebKey] = useState(0);
+  const [apiBibles, setApiBibles] = useState([]);
+  const [remote, setRemote] = useState({ key: '', text: '', failed: false, loading: false });
   const [bookmarksVisible, setBookmarksVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [editorVisible, setEditorVisible] = useState(false);
@@ -174,9 +255,13 @@ export default function App() {
       AsyncStorage.getItem(BOOKMARKS_KEY),
       AsyncStorage.getItem(SETTINGS_KEY),
       AsyncStorage.getItem(BACKGROUND_KEY),
+      AsyncStorage.getItem(BIBLES_KEY),
     ])
-      .then(([savedBookmarks, savedSettings, savedBackground]) => {
+      .then(([savedBookmarks, savedSettings, savedBackground, savedBibles]) => {
         if (!active) return;
+        if (savedBibles) {
+          try { setApiBibles(JSON.parse(savedBibles)); } catch (_) {}
+        }
         if (savedBookmarks) {
           try { setBookmarks(JSON.parse(savedBookmarks)); } catch (_) { setBookmarks([]); }
         }
@@ -186,6 +271,10 @@ export default function App() {
             const parsed = JSON.parse(savedSettings);
             oldBackground = parsed.backgroundImage || null;
             delete parsed.backgroundImage;
+            const legacy = { WEB: 'web', KJV: 'kjv' };
+            const saved = parsed.verseTranslation;
+            if (legacy[saved]) parsed.verseTranslation = legacy[saved];
+            else if (saved && !TRANSLATIONS.some((item) => item.id === saved) && String(saved).indexOf('api:') !== 0) parsed.verseTranslation = 'web';
             setSettings({ ...DEFAULT_SETTINGS, ...parsed });
           } catch (_) {}
         }
@@ -224,6 +313,33 @@ export default function App() {
     (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) - Date.UTC(today.getFullYear(), 0, 1)) / 86400000
   );
   const dailyVerse = DAILY_VERSES[dayOfYear % DAILY_VERSES.length];
+  const tr = settings.verseTranslation || 'web';
+  const trKey = tr + '|' + dailyVerse.reference;
+  const trMeta = TRANSLATIONS.find((item) => item.id === tr) || apiBibles.find((item) => item.id === tr);
+  const trLabel = trMeta ? trMeta.label : 'WEB';
+  const showKjv = tr === 'kjv' && !!KJV_TEXT[dailyVerse.reference];
+  const remoteReady = tr !== 'web' && tr !== 'kjv' && remote.key === trKey && !!remote.text;
+  const verseText = showKjv ? KJV_TEXT[dailyVerse.reference] : remoteReady ? remote.text : dailyVerse.text;
+  const verseVersion = showKjv ? 'KJV' : remoteReady ? trLabel : 'WEB';
+  const verseNote = remote.key === trKey && remote.loading
+    ? 'Loading ' + trLabel + '…'
+    : remote.key === trKey && remote.failed
+      ? 'Couldn’t load ' + trLabel + '. Showing WEB.'
+      : '';
+  const linkVersion = tr === 'web' ? 'WEB' : tr === 'kjv' ? 'KJV' : tr.indexOf('api:') === 0 && trMeta ? (trMeta.label === 'NASB' ? 'NASB1995' : trMeta.label) : '';
+
+  useEffect(() => {
+    if (tr === 'web' || tr === 'kjv') {
+      setRemote({ key: trKey, text: '', failed: false, loading: false });
+      return undefined;
+    }
+    let active = true;
+    setRemote({ key: trKey, text: '', failed: false, loading: true });
+    loadVerse(tr, dailyVerse.reference, settings.bibleKey).then((text) => {
+      if (active) setRemote({ key: trKey, text, failed: !text, loading: false });
+    });
+    return () => { active = false; };
+  }, [tr, dailyVerse.reference, settings.bibleKey]);
 
   const updateBookmarks = async (next) => {
     setBookmarks(next);
@@ -278,6 +394,33 @@ export default function App() {
       return false;
     }
     return true;
+  };
+
+  const loadApiBibles = async () => {
+    const key = (settings.bibleKey || '').trim();
+    if (!key) {
+      Alert.alert('Add your API.Bible key first', 'Paste the key from your free API.Bible account into the box above.');
+      return;
+    }
+    try {
+      const res = await fetch('https://api.scripture.api.bible/v1/bibles?language=eng', { headers: { 'api-key': key } });
+      if (!res.ok) throw new Error('bad status');
+      const json = await res.json();
+      const list = (json.data || [])
+        .map((bible) => ({ id: 'api:' + bible.id, label: bible.abbreviationLocal || bible.abbreviation || bible.name }))
+        .slice(0, 60);
+      setApiBibles(list);
+      await AsyncStorage.setItem(BIBLES_KEY, JSON.stringify(list));
+      Alert.alert('Versions loaded', list.length + ' versions are available with your key.');
+    } catch (_) {
+      Alert.alert('Could not load versions', 'Check your API.Bible key and your connection.');
+    }
+  };
+
+  const clearApiBibles = async () => {
+    setApiBibles([]);
+    try { await AsyncStorage.removeItem(BIBLES_KEY); } catch (_) {}
+    if (String(settings.verseTranslation).indexOf('api:') === 0) updateSetting('verseTranslation', 'web');
   };
 
   const goHome = () => {
@@ -394,16 +537,17 @@ export default function App() {
               <Text style={styles.verseSpark}>✦</Text>
               <Text style={styles.verseLabel}>TODAY’S VERSE</Text>
             </View>
-            <Text style={styles.verseReference}>{dailyVerse.reference.toUpperCase()} · WEB</Text>
+            <Text style={styles.verseReference}>{dailyVerse.reference.toUpperCase()} · {verseVersion}</Text>
           </View>
-          <Text style={styles.verseText}>{dailyVerse.text}</Text>
+          <Text style={styles.verseText}>{verseText}</Text>
+          {verseNote ? <Text style={styles.verseNote}>{verseNote}</Text> : null}
           <Pressable
-            onPress={() => navigate('https://www.biblegateway.com/passage/?search=' + encodeURIComponent(dailyVerse.reference) + '&version=' + (settings.verseTranslation === 'NASB' ? 'NASB1995' : settings.verseTranslation))}
+            onPress={() => navigate('https://www.biblegateway.com/passage/?search=' + encodeURIComponent(dailyVerse.reference) + (linkVersion ? '&version=' + linkVersion : ''))}
             style={({ pressed }) => [styles.verseSourceButton, pressed && styles.pressed]}
             accessibilityRole="link"
-            accessibilityLabel={'Read ' + dailyVerse.reference + ' in ' + settings.verseTranslation + ' on BibleGateway'}
+            accessibilityLabel={'Read ' + dailyVerse.reference + ' in ' + trLabel + ' on BibleGateway'}
           >
-            <Text style={styles.verseSourceText}>Read in {settings.verseTranslation} on BibleGateway ↗</Text>
+            <Text style={styles.verseSourceText}>Read in {trLabel} on BibleGateway ↗</Text>
           </Pressable>
         </View>
       )}
@@ -661,18 +805,35 @@ export default function App() {
               </View>
 
               <Text style={styles.settingsSectionTitle}>Bible translation</Text>
-              <Text style={styles.settingsIntro}>Choose the translation opened on BibleGateway when you tap the verse link. The verse on your home screen is from the World English Bible.</Text>
-              <View style={styles.engineOptions}>
-                {['KJV', 'NIV', 'NASB'].map((translation) => (
+              <Text style={styles.settingsIntro}>The verse on your home screen changes to the translation you pick. These are public-domain texts that load from bible-api.com. KJV and WEB also work offline.</Text>
+              <View style={styles.transWrap}>
+                {[...TRANSLATIONS, ...apiBibles].map((item) => (
                   <Pressable
-                    key={translation}
-                    onPress={() => updateSetting('verseTranslation', translation)}
-                    style={[styles.engineOption, settings.verseTranslation === translation && styles.engineOptionSelected]}
+                    key={item.id}
+                    onPress={() => updateSetting('verseTranslation', item.id)}
+                    style={[styles.transOption, settings.verseTranslation === item.id && styles.engineOptionSelected]}
                   >
-                    <Text style={[styles.engineOptionText, settings.verseTranslation === translation && styles.engineOptionTextSelected]}>{translation}</Text>
-                    {settings.verseTranslation === translation && <Text style={styles.engineCheck}>✓</Text>}
+                    <Text style={[styles.engineOptionText, settings.verseTranslation === item.id && styles.engineOptionTextSelected]}>{item.label}</Text>
                   </Pressable>
                 ))}
+              </View>
+              <Text style={styles.settingsIntro}>Licensed versions such as NIV, NASB and ESV can’t be bundled in an app. If you have a free API.Bible key, paste it here to load the versions your key is licensed for.</Text>
+              <TextInput
+                value={settings.bibleKey}
+                onChangeText={(value) => updateSetting('bibleKey', value.trim())}
+                placeholder="API.Bible key (optional)"
+                placeholderTextColor="#7e8ba1"
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={styles.fieldInput}
+              />
+              <View style={[styles.backgroundActions, { marginTop: 10 }]}>
+                <Pressable onPress={loadApiBibles} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
+                  <Text style={styles.backgroundActionText}>Load my versions</Text>
+                </Pressable>
+                <Pressable onPress={clearApiBibles} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
+                  <Text style={styles.backgroundActionText}>Remove versions</Text>
+                </Pressable>
               </View>
 
               <Text style={styles.settingsSectionTitle}>Search</Text>
@@ -840,6 +1001,9 @@ const styles = StyleSheet.create({
   engineOptionSelected: { borderColor: '#e6ad60', backgroundColor: '#392f28' },
   engineOptionText: { color: '#9ba8bc', fontSize: 12, fontWeight: '700' },
   engineOptionTextSelected: { color: '#ffe3b1' },
+  transWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 17 },
+  transOption: { minHeight: 38, justifyContent: 'center', borderRadius: 12, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, paddingHorizontal: 12 },
+  verseNote: { color: '#8190a8', fontSize: 12, paddingHorizontal: 5, paddingBottom: 4 },
   engineCheck: { color: '#e6ad60', fontSize: 12, fontWeight: '800' },
   settingsCard: { backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, borderRadius: 16, paddingHorizontal: 13, marginBottom: 16 },
   settingRow: { flexDirection: 'row', alignItems: 'center', minHeight: 72, paddingVertical: 10, gap: 10 },
