@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS = {
   allowPopups: false,
   privateBrowsing: false,
   blockThirdPartyCookies: true,
+  blockAds: true,
   domStorageEnabled: true,
   showDailyVerse: true,
   quickPaths: { DuckDuckGo: false, YouTube: false, Wikipedia: false, 'Bible Gateway': false },
@@ -46,6 +47,29 @@ const SEARCH_ENGINES = {
   Google: 'https://www.google.com/search?q=',
   Bing: 'https://www.bing.com/search?q=',
 };
+// Lightweight ad/tracker host list plus cosmetic hiding. This is not the full uBlock Origin engine;
+// WebView navigation callbacks cannot reliably filter every subresource on iOS.
+const AD_TRACKER_HOSTS = [
+  'doubleclick.net', 'googlesyndication.com', 'googleadservices.com',
+  'adservice.google.com', 'adnxs.com', 'adsrvr.org', 'adform.net',
+  'taboola.com', 'outbrain.com', 'scorecardresearch.com', 'criteo.com',
+  'hotjar.com', 'clarity.ms', 'mixpanel.com', 'segment.io',
+  'googletagmanager.com', 'google-analytics.com', 'facebook.net',
+  'connect.facebook.net', 'amazon-adsystem.com', 'advertising.com',
+];
+const AD_COSMETIC_SCRIPT = `(function() {
+  var css = 'iframe[src*="doubleclick"],iframe[src*="googlesyndication"],iframe[id*="google_ads"],[id^="google_ads"],[class*="ad-slot"],[class*="ad-container"],[class*="advertisement"],[data-ad-slot],[aria-label="Advertisement"]{display:none!important;visibility:hidden!important}';
+  function addStyle() {
+    if (document.getElementById('__saturn_ad_rules')) return;
+    var style = document.createElement('style');
+    style.id = '__saturn_ad_rules';
+    style.textContent = css;
+    (document.head || document.documentElement).appendChild(style);
+  }
+  addStyle();
+  new MutationObserver(addStyle).observe(document.documentElement, {childList:true,subtree:true});
+})(); true;`;
+
 const QUICK_LINKS = [
   { title: 'DuckDuckGo', subtitle: 'Private search', url: 'https://duckduckgo.com', mark: 'D', color: '#de5833' },
   { title: 'YouTube', subtitle: 'Watch', url: 'https://www.youtube.com', mark: '▶', color: '#ff4d4d' },
@@ -371,6 +395,12 @@ export default function App() {
     const next = request.url;
     if (next === 'about:blank') return true;
     if (!/^https?:\/\//i.test(next)) return false;
+    if (settings.blockAds) {
+      try {
+        const hostname = new URL(next).hostname.toLowerCase();
+        if (AD_TRACKER_HOSTS.some((host) => hostname === host || hostname.endsWith('.' + host))) return false;
+      } catch (_) {}
+    }
     if (settings.preferHttps && /^http:\/\//i.test(next)) {
       if (request.isTopFrame !== false) {
         const upgraded = next.replace(/^http:\/\//i, 'https://');
@@ -679,6 +709,7 @@ export default function App() {
           }}
           onShouldStartLoadWithRequest={guardRequest}
           javaScriptEnabled={settings.javaScriptEnabled}
+          injectedJavaScriptBeforeContentLoaded={settings.blockAds ? AD_COSMETIC_SCRIPT : undefined}
           domStorageEnabled={settings.domStorageEnabled}
           javaScriptCanOpenWindowsAutomatically={settings.allowPopups}
           setSupportMultipleWindows={settings.allowPopups}
@@ -885,6 +916,8 @@ export default function App() {
 
               <Text style={styles.settingsSectionTitle}>Security</Text>
               <View style={styles.settingsCard}>
+                <SettingRow title="Block ads and trackers (basic)" detail="Blocks requests to a small list of known ad/tracker hosts and hides some common ad elements. This is not the full uBlock Origin extension." value={settings.blockAds} onValueChange={(value) => updateSetting('blockAds', value)} />
+                <View style={styles.settingDivider} />
                 <SettingRow title="Prefer secure connections" detail="Upgrade http links to https, including links you tap, and block insecure mixed content." value={settings.preferHttps} onValueChange={(value) => updateSetting('preferHttps', value)} />
                 <View style={styles.settingDivider} />
                 <SettingRow title="JavaScript" detail="Many sites need this to work. Turn it off for a stricter, simpler session." value={settings.javaScriptEnabled} onValueChange={(value) => updateSetting('javaScriptEnabled', value)} />
