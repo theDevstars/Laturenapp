@@ -2,13 +2,14 @@
   "expo": {
     "name": "Lantern",
     "slug": "lantern",
-    "version": "1.0.0",
+    "version": "1.0.9",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourname.lantern"
+      "bundleIdentifier": "com.yourname.lantern",
+      "buildNumber": "9"
     },
     "android": {
       "package": "com.yourname.lantern",
@@ -16,15 +17,28 @@
         {
           "action": "VIEW",
           "data": [
-            {"scheme": "http"},
-            {"scheme": "https"}
+            {
+              "scheme": "http"
+            },
+            {
+              "scheme": "https"
+            }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
-      ]
+      ],
+      "versionCode": 9
     },
     "plugins": [
-      ["expo-image-picker", {"photosPermission": "Choose a wallpaper for Lantern."}]
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a wallpaper for Lantern."
+        }
+      ]
     ]
   }
 }
