@@ -368,7 +368,13 @@ export default function App() {
   );
 
   return (
-    <SafeAreaView style={styles.root}>
+    <ImageBackground
+      source={settings.backgroundImage ? { uri: settings.backgroundImage } : undefined}
+      style={styles.root}
+      imageStyle={styles.backgroundImageStyle}
+      resizeMode="cover"
+    >
+    <SafeAreaView style={styles.safeRoot}>
       <NativeStatusBar barStyle="light-content" backgroundColor="#0b1220" />
       <View style={styles.header}>
         <View style={styles.brand}>
