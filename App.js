@@ -26,6 +26,7 @@ const BOOKMARKS_KEY = '@lantern/bookmarks-v1';
 const SETTINGS_KEY = '@lantern/settings-v1';
 const BACKGROUND_KEY = '@lantern/background-v1';
 const BIBLES_KEY = '@lantern/api-bibles-v1';
+const SETUP_KEY = '@lantern/setup-complete-v1';
 const MAX_BACKGROUND_CHARS = 1500000;
 const DEFAULT_SETTINGS = {
   searchEngine: 'DuckDuckGo',
@@ -244,6 +245,7 @@ export default function App() {
   const [remote, setRemote] = useState({ key: '', text: '', failed: false, loading: false });
   const [bookmarksVisible, setBookmarksVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [setupVisible, setSetupVisible] = useState(false);
   const [editorVisible, setEditorVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [bookmarkName, setBookmarkName] = useState('');
@@ -257,9 +259,11 @@ export default function App() {
       AsyncStorage.getItem(SETTINGS_KEY),
       AsyncStorage.getItem(BACKGROUND_KEY),
       AsyncStorage.getItem(BIBLES_KEY),
+      AsyncStorage.getItem(SETUP_KEY),
     ])
-      .then(([savedBookmarks, savedSettings, savedBackground, savedBibles]) => {
+      .then(([savedBookmarks, savedSettings, savedBackground, savedBibles, setupComplete]) => {
         if (!active) return;
+        if (!setupComplete) setSetupVisible(true);
         if (savedBibles) {
           try { setApiBibles(JSON.parse(savedBibles)); } catch (_) {}
         }
@@ -353,6 +357,12 @@ export default function App() {
     const next = [...bookmarks];
     [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
     await updateBookmarks(next);
+  };
+
+  const finishSetup = async (configure) => {
+    setSetupVisible(false);
+    try { await AsyncStorage.setItem(SETUP_KEY, 'yes'); } catch (_) {}
+    if (configure) setSettingsVisible(true);
   };
 
   const updateSetting = async (key, value) => {
@@ -774,6 +784,18 @@ export default function App() {
         </View>
       </Modal>
 
+      <Modal visible={setupVisible} animationType="fade" transparent onRequestClose={() => finishSetup(false)}>
+        <View style={styles.setupBackdrop}>
+          <View style={styles.setupCard}>
+            <Text style={styles.setupSpark}>✳</Text>
+            <Text style={styles.setupTitle}>Meet Lantern</Text>
+            <Text style={styles.setupBody}>Let’s set up your browser just the way you like it. Start with privacy-minded defaults, then choose which shortcuts appear on your home screen.</Text>
+            <Pressable style={styles.setupPrimary} onPress={() => finishSetup(false)}><Text style={styles.setupPrimaryText}>✓  Use defaults</Text></Pressable>
+            <Pressable style={styles.setupSecondary} onPress={() => finishSetup(true)}><Text style={styles.setupSecondaryText}>→  Configure</Text></Pressable>
+            <Text style={styles.setupFootnote}>You can change your choices any time in Settings.</Text>
+          </View>
+        </View>
+      </Modal>
       <Modal visible={settingsVisible} animationType="slide" transparent onRequestClose={() => setSettingsVisible(false)}>
         <View style={styles.modalBackdrop}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setSettingsVisible(false)} accessibilityLabel="Close settings" />
@@ -965,6 +987,16 @@ const styles = StyleSheet.create({
   bookmarkEmptyHome: { borderWidth: 1, borderColor: '#293752', borderStyle: 'dashed', borderRadius: 14, padding: 14, marginBottom: 8 },
   bookmarkEmptyText: { color: '#aab6c9', fontSize: 12, textAlign: 'center' },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
+  setupBackdrop: { flex: 1, backgroundColor: 'rgba(4, 8, 18, 0.82)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  setupCard: { width: '100%', maxWidth: 420, borderRadius: 28, paddingHorizontal: 24, paddingVertical: 30, alignItems: 'center', backgroundColor: '#243b88', borderWidth: 1, borderColor: '#536dc0' },
+  setupSpark: { color: '#f6f2e8', fontSize: 48, marginBottom: 12 },
+  setupTitle: { color: '#ffffff', fontSize: 30, fontWeight: '700', textAlign: 'center' },
+  setupBody: { color: '#d5def7', fontSize: 14, lineHeight: 21, textAlign: 'center', marginTop: 12, marginBottom: 24 },
+  setupPrimary: { width: '100%', borderRadius: 14, backgroundColor: '#657fd0', paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
+  setupPrimaryText: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+  setupSecondary: { width: '100%', borderRadius: 14, backgroundColor: '#f7f7fa', paddingVertical: 14, alignItems: 'center' },
+  setupSecondaryText: { color: '#202a45', fontSize: 15, fontWeight: '700' },
+  setupFootnote: { color: '#c5d0f1', fontSize: 10, textAlign: 'center', marginTop: 22 },
   quickCard: { width: '48%', minHeight: 72, flexDirection: 'row', alignItems: 'center', backgroundColor: '#121c2f', borderWidth: 1, borderColor: '#202d43', borderRadius: 15, paddingHorizontal: 10, paddingVertical: 9, gap: 8 },
   quickMark: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   quickMarkText: { fontWeight: '800', fontSize: 16 },
