@@ -26,25 +26,21 @@ jobs:
         run: |
           npm install --no-save sharp
           node -e "require('sharp')('assets/saturn-icon.svg').resize(1024,1024).png().toFile('assets/icon.png')"
-      - name: Commit generated Saturn PNG icon
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/icon.png
-          if ! git diff --cached --quiet; then
-            git commit -m "Update app icon to Saturn"
-            git push
-          fi
       - name: Generate iOS project
         run: npx expo prebuild --platform ios --non-interactive
       - name: Build app without code signing
         run: |
           cd ios
-          xcodebuild -workspace *.xcworkspace -scheme Saturn -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+          WORKSPACE=$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)
+          if [ -z "$WORKSPACE" ]; then echo "No Xcode workspace found"; ls -la; exit 1; fi
+          SCHEME=$(xcodebuild -list -json -workspace "$WORKSPACE" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const j=JSON.parse(d);const w=Object.values(j).find(v=>v&&v.schemes);if(!w||!w.schemes.length)process.exit(2);console.log(w.schemes[0])})")
+          echo "Building Xcode workspace: $WORKSPACE"
+          echo "Using Xcode scheme: $SCHEME"
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
       - name: Package unsigned IPA
         run: |
-          APP_PATH="ios/build/Build/Products/Release-iphoneos/Saturn.app"
-          test -d "$APP_PATH" || { echo "Built .app not found at $APP_PATH"; find ios/build/Build/Products -maxdepth 4 -name '*.app' -print; exit 1; }
+          APP_PATH=$(find ios/build/Build/Products/Release-iphoneos -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$APP_PATH" && test -d "$APP_PATH" || { echo "Built .app not found"; find ios/build/Build/Products -maxdepth 4 -name '*.app' -print; exit 1; }
           mkdir -p Payload
           cp -R "$APP_PATH" Payload/
           zip -r Saturn-unsigned.ipa Payload
