@@ -96,6 +96,11 @@ jobs:
       - name: Install desktop dependencies
         working-directory: desktop
         run: npm install
+      - name: Set Windows installer version
+        working-directory: desktop
+        env:
+          RELEASE_VERSION: 1.0.${{ github.run_number }}
+        run: node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json','utf8')); p.version=process.env.RELEASE_VERSION; fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');"
       - name: Package Windows installer
         working-directory: desktop
         run: npm run dist
@@ -147,6 +152,8 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
           RELEASE_TAG: lantern-v1.0.${{ github.run_number }}
         run: |
+          CURRENT_BUILD=$(gh api repos/theDevstars/Laturenapp/contents/sidestore-source.json --jq .content | base64 -d | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).apps[0].versions[0].buildVersion||0)}catch{console.log(0)}})")
+          if [ "$CURRENT_BUILD" -gt "$BUILD_NUMBER" ]; then echo "A newer source is already published; keeping it."; exit 0; fi
           export IPA_SIZE=$(stat -c%s release-files/Lantern-unsigned.ipa)
           node -e "const fs=require('fs'); const build=process.env.BUILD_NUMBER; const tag=process.env.RELEASE_TAG; const source={name:'Lantern',subtitle:'A calmer web browser',description:'Lantern for iPhone and iPad. Updates are published with each GitHub release.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',website:'https://github.com/theDevstars/Laturenapp',tintColor:'#DDAF64',apps:[{name:'Lantern',bundleIdentifier:'com.yourname.lantern',developerName:'theDevstars',subtitle:'Browse with a little more calm',localizedDescription:'Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',tintColor:'#DDAF64',category:'utilities',versions:[{version:'1.0.'+build,buildVersion:build,date:new Date().toISOString(),localizedDescription:'Lantern browser update.',downloadURL:'https://github.com/theDevstars/Laturenapp/releases/download/'+tag+'/Lantern-unsigned.ipa',size:Number(process.env.IPA_SIZE)}],appPermissions:{entitlements:[],privacy:{NSPhotoLibraryUsageDescription:'Choose a wallpaper for Lantern.'}}}],news:[]};fs.writeFileSync('sidestore-source.json',JSON.stringify(source,null,2)+'\\n');"
           FILE_SHA=$(gh api repos/theDevstars/Laturenapp/contents/sidestore-source.json --jq .sha)
