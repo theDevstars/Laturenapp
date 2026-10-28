@@ -39,7 +39,12 @@ jobs:
       - name: Build iOS app
         run: |
           cd ios
-          xcodebuild -workspace *.xcworkspace -scheme Saturn -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+          WORKSPACE=$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)
+          if [ -z "$WORKSPACE" ]; then echo "No Xcode workspace found"; ls -la; exit 1; fi
+          SCHEME=$(xcodebuild -list -json -workspace "$WORKSPACE" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const j=JSON.parse(d);const w=Object.values(j).find(v=>v&&v.schemes);if(!w||!w.schemes.length)process.exit(2);console.log(w.schemes[0])})")
+          echo "Building Xcode workspace: $WORKSPACE"
+          echo "Using Xcode scheme: $SCHEME"
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
       - name: Package IPA
         run: |
           APP_PATH="ios/build/Build/Products/Release-iphoneos/Saturn.app"
