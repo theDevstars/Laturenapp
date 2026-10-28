@@ -1,8 +1,8 @@
-# Lantern — Expo Go preview
+# Saturn — Expo Go preview
 
-Lantern is a simple mobile browser built with Expo and React Native. The current app uses React Native WebView, which is available in Expo Go.
+Saturn is a simple mobile browser built with Expo and React Native. The current app uses React Native WebView, which is available in Expo Go.
 
-## Open Lantern in Expo Go
+## Open Saturn in Expo Go
 
 **Expo Go needs a running development server. GitHub by itself cannot provide the live QR code.**
 
@@ -17,7 +17,7 @@ Lantern is a simple mobile browser built with Expo and React Native. The current
    npx expo start --tunnel
    ```
 4. Keep the terminal running. It will show a QR code.
-5. Open the iPhone Camera app and scan the QR code, then tap the prompt to open Lantern in Expo Go. If prompted, open the project directly in Expo Go.
+5. Open the iPhone Camera app and scan the QR code, then tap the prompt to open Saturn in Expo Go. If prompted, open the project directly in Expo Go.
 
 If you only have your iPhone and no computer, tell me and I can guide you through an Expo Snack preview instead.
 
