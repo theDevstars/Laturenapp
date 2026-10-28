@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS = {
   javaScriptEnabled: true,
   allowPopups: false,
   showDailyVerse: true,
+  verseTranslation: 'KJV',
 };
 const SEARCH_ENGINES = {
   DuckDuckGo: 'https://duckduckgo.com/?q=',
@@ -291,6 +292,14 @@ export default function App() {
             <Text style={styles.verseReference}>{dailyVerse.reference.toUpperCase()} · WEB</Text>
           </View>
           <Text style={styles.verseText}>{dailyVerse.text}</Text>
+          <Pressable
+            onPress={() => navigate('https://www.biblegateway.com/passage/?search=' + encodeURIComponent(dailyVerse.reference) + '&version=' + (settings.verseTranslation === 'NASB' ? 'NASB1995' : settings.verseTranslation))}
+            style={({ pressed }) => [styles.verseSourceButton, pressed && styles.pressed]}
+            accessibilityRole="link"
+            accessibilityLabel={'Read ' + dailyVerse.reference + ' in ' + settings.verseTranslation + ' on BibleGateway'}
+          >
+            <Text style={styles.verseSourceText}>Read in {settings.verseTranslation} on BibleGateway ↗</Text>
+          </Pressable>
         </View>
       )}
 
@@ -512,6 +521,21 @@ export default function App() {
                 />
               </View>
 
+              <Text style={styles.settingsSectionTitle}>Bible translation</Text>
+              <Text style={styles.settingsIntro}>Choose the translation opened on BibleGateway when you tap the verse link.</Text>
+              <View style={styles.engineOptions}>
+                {['KJV', 'NIV', 'NASB'].map((translation) => (
+                  <Pressable
+                    key={translation}
+                    onPress={() => updateSetting('verseTranslation', translation)}
+                    style={[styles.engineOption, settings.verseTranslation === translation && styles.engineOptionSelected]}
+                  >
+                    <Text style={[styles.engineOptionText, settings.verseTranslation === translation && styles.engineOptionTextSelected]}>{translation}</Text>
+                    {settings.verseTranslation === translation && <Text style={styles.engineCheck}>✓</Text>}
+                  </Pressable>
+                ))}
+              </View>
+
               <Text style={styles.settingsSectionTitle}>Search</Text>
               <Text style={styles.settingsIntro}>Choose where Lantern sends search terms. DuckDuckGo is selected by default.</Text>
               <View style={styles.engineOptions}>
@@ -597,6 +621,8 @@ const styles = StyleSheet.create({
   verseLabel: { color: '#f4e7cf', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
   verseReference: { color: '#e8b76d', fontSize: 10, fontWeight: '800', letterSpacing: 0.6 },
   verseText: { color: '#f4f0e7', fontSize: 14, lineHeight: 21, paddingHorizontal: 5, paddingVertical: 8 },
+  verseSourceButton: { alignSelf: 'flex-start', marginTop: 5, paddingHorizontal: 5, paddingVertical: 3 },
+  verseSourceText: { color: '#e8b76d', fontSize: 11, fontWeight: '700' },
   verseImage: { width: '100%', height: 88, backgroundColor: '#10192b', borderRadius: 12 },
   sectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 21, marginBottom: 10 },
   sectionTitle: { color: '#f2f3f5', fontSize: 16, fontWeight: '700' },
