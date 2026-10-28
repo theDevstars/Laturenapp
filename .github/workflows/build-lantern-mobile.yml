@@ -21,7 +21,7 @@ permissions:
 jobs:
   build-ios:
     name: Build iOS IPA (unsigned)
-    runs-on: macos-26
+    runs-on: macos-26-intel
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
