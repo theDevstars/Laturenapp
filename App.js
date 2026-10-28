@@ -41,6 +41,21 @@ const DEFAULT_SETTINGS = {
   quickPaths: { DuckDuckGo: false, YouTube: false, Wikipedia: false, 'Bible Gateway': false },
   verseTranslation: 'web',
   bibleKey: '',
+  passwordManager: 'Bitwarden',
+  extensionShortcut: 'Chrome Web Store',
+};
+const PASSWORD_MANAGERS = {
+  'Bitwarden': 'https://vault.bitwarden.com',
+  '1Password': 'https://my.1password.com',
+  'Proton Pass': 'https://pass.proton.me',
+  'KeePassXC': 'https://keepassxc.org',
+};
+const EXTENSION_TOOLS = {
+  'Chrome Web Store': 'https://chromewebstore.google.com/',
+  'Bitwarden': 'https://vault.bitwarden.com/',
+  'Google Translate': 'https://translate.google.com/',
+  'Grammarly': 'https://www.grammarly.com/',
+  'Dark Reader': 'https://darkreader.org/',
 };
 const SEARCH_ENGINES = {
   DuckDuckGo: 'https://duckduckgo.com/?q=',
@@ -238,6 +253,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [passwordMenuOpen, setPasswordMenuOpen] = useState(false);
+  const [extensionMenuOpen, setExtensionMenuOpen] = useState(false);
   const [background, setBackground] = useState(null);
   const [webKey, setWebKey] = useState(0);
   const [apiBibles, setApiBibles] = useState([]);
@@ -914,6 +931,74 @@ export default function App() {
                 ))}
               </View>
 
+              <Text style={styles.settingsSectionTitle}>Passwords</Text>
+              <Text style={styles.settingsIntro}>Choose a password manager, then open it. Saturn does not store your vault or provide native iPhone AutoFill.</Text>
+              <View style={styles.settingsCard}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Choose password manager"
+                  onPress={() => setPasswordMenuOpen((open) => !open)}
+                  style={({ pressed }) => [styles.selectMenuButton, pressed && styles.pressed]}
+                >
+                  <View style={styles.settingCopy}>
+                    <Text style={styles.settingTitle}>{settings.passwordManager || 'Bitwarden'}</Text>
+                    <Text style={styles.settingDetail}>Selected password manager</Text>
+                  </View>
+                  <Text style={styles.selectMenuChevron}>{passwordMenuOpen ? '⌃' : '⌄'}</Text>
+                </Pressable>
+                {passwordMenuOpen && Object.keys(PASSWORD_MANAGERS).map((manager) => (
+                  <Pressable
+                    key={manager}
+                    onPress={() => { updateSetting('passwordManager', manager); setPasswordMenuOpen(false); }}
+                    style={({ pressed }) => [styles.selectMenuOption, settings.passwordManager === manager && styles.selectMenuOptionSelected, pressed && styles.pressed]}
+                  >
+                    <Text style={[styles.settingTitle, settings.passwordManager === manager && styles.selectMenuOptionTextSelected]}>{manager}</Text>
+                    {settings.passwordManager === manager && <Text style={styles.engineCheck}>✓</Text>}
+                  </Pressable>
+                ))}
+                <View style={styles.settingDivider} />
+                <Pressable
+                  onPress={() => Linking.openURL(PASSWORD_MANAGERS[settings.passwordManager] || PASSWORD_MANAGERS.Bitwarden).catch(() => Alert.alert('Could not open password manager', 'Check your connection and try again.'))}
+                  style={({ pressed }) => [styles.settingsActionButton, pressed && styles.pressed]}
+                >
+                  <Text style={styles.settingsActionButtonText}>Open {settings.passwordManager || 'Bitwarden'} ↗</Text>
+                </Pressable>
+              </View>
+
+              <Text style={styles.settingsSectionTitle}>Extensions & tools</Text>
+              <Text style={styles.settingsIntro}>Choose a web tool or extension directory. iOS WebView does not install desktop browser extensions, so these open as websites instead.</Text>
+              <View style={styles.settingsCard}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Choose extension or web tool"
+                  onPress={() => setExtensionMenuOpen((open) => !open)}
+                  style={({ pressed }) => [styles.selectMenuButton, pressed && styles.pressed]}
+                >
+                  <View style={styles.settingCopy}>
+                    <Text style={styles.settingTitle}>{settings.extensionShortcut || 'Chrome Web Store'}</Text>
+                    <Text style={styles.settingDetail}>Select a tool to open</Text>
+                  </View>
+                  <Text style={styles.selectMenuChevron}>{extensionMenuOpen ? '⌃' : '⌄'}</Text>
+                </Pressable>
+                {extensionMenuOpen && Object.keys(EXTENSION_TOOLS).map((tool) => (
+                  <Pressable
+                    key={tool}
+                    onPress={() => { updateSetting('extensionShortcut', tool); setExtensionMenuOpen(false); }}
+                    style={({ pressed }) => [styles.selectMenuOption, settings.extensionShortcut === tool && styles.selectMenuOptionSelected, pressed && styles.pressed]}
+                  >
+                    <Text style={[styles.settingTitle, settings.extensionShortcut === tool && styles.selectMenuOptionTextSelected]}>{tool}</Text>
+                    {settings.extensionShortcut === tool && <Text style={styles.engineCheck}>✓</Text>}
+                  </Pressable>
+                ))}
+                <View style={styles.settingDivider} />
+                <Pressable
+                  onPress={() => Linking.openURL(EXTENSION_TOOLS[settings.extensionShortcut] || EXTENSION_TOOLS['Chrome Web Store']).catch(() => Alert.alert('Could not open tool', 'Check your connection and try again.'))}
+                  style={({ pressed }) => [styles.settingsActionButton, pressed && styles.pressed]}
+                >
+                  <Text style={styles.settingsActionButtonText}>Open {settings.extensionShortcut || 'Chrome Web Store'} ↗</Text>
+                </Pressable>
+              </View>
+
               <Text style={styles.settingsSectionTitle}>Security</Text>
               <View style={styles.settingsCard}>
                 <SettingRow title="Block ads and trackers (basic)" detail="Blocks requests to a small list of known ad/tracker hosts and hides some common ad elements. This is not the full uBlock Origin extension." value={settings.blockAds} onValueChange={(value) => updateSetting('blockAds', value)} />
@@ -1101,6 +1186,13 @@ const styles = StyleSheet.create({
   verseNote: { color: '#8190a8', fontSize: 12, paddingHorizontal: 5, paddingBottom: 4 },
   engineCheck: { color: '#e6ad60', fontSize: 12, fontWeight: '800' },
   settingsCard: { backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, borderRadius: 16, paddingHorizontal: 13, marginBottom: 16 },
+  selectMenuButton: { flexDirection: 'row', alignItems: 'center', minHeight: 62, paddingVertical: 10, paddingHorizontal: 13, gap: 10 },
+  selectMenuChevron: { color: '#e8b76d', fontSize: 23, paddingHorizontal: 6 },
+  selectMenuOption: { minHeight: 48, paddingHorizontal: 15, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: '#293752' },
+  selectMenuOptionSelected: { backgroundColor: '#202d43' },
+  selectMenuOptionTextSelected: { color: '#e8b76d' },
+  settingsActionButton: { margin: 10, paddingHorizontal: 14, paddingVertical: 12, alignItems: 'center', borderRadius: 11, backgroundColor: '#e6ad60' },
+  settingsActionButtonText: { color: '#192235', fontSize: 13, fontWeight: '800' },
   settingRow: { flexDirection: 'row', alignItems: 'center', minHeight: 72, paddingVertical: 10, gap: 10 },
   settingCopy: { flex: 1 },
   settingTitle: { color: '#e7ebf1', fontSize: 14, fontWeight: '700' },
