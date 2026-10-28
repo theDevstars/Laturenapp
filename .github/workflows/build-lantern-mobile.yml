@@ -100,7 +100,7 @@ jobs:
         working-directory: desktop
         env:
           RELEASE_VERSION: 1.0.${{ github.run_number }}
-        run: node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json','utf8')); p.version=process.env.RELEASE_VERSION; fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');"
+        run: node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json','utf8')); p.version=process.env.RELEASE_VERSION; fs.writeFileSync('package.json',JSON.stringify(p,null,2));"
       - name: Package Windows installer
         working-directory: desktop
         run: npm run dist
