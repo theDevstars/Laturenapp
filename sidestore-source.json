@@ -1,28 +1,28 @@
 {
-  "name": "Saturn",
+  "name": "Lantern",
   "subtitle": "A calmer web browser",
-  "description": "Saturn for iPhone and iPad. Updates are published with each GitHub release.",
+  "description": "Lantern for iPhone and iPad. Updates are published with each GitHub release.",
   "iconURL": "https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png",
   "website": "https://github.com/theDevstars/Laturenapp",
   "tintColor": "#DDAF64",
   "apps": [
     {
-      "name": "Saturn",
+      "name": "Lantern",
       "bundleIdentifier": "com.yourname.lantern",
       "developerName": "theDevstars",
       "subtitle": "Browse with a little more calm",
-      "localizedDescription": "Saturn browser with search, bookmarks, Quick Paths, and daily Bible verses.",
+      "localizedDescription": "Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.",
       "iconURL": "https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png",
       "tintColor": "#DDAF64",
       "category": "utilities",
       "versions": [
         {
-          "version": "1.0.26",
-          "buildVersion": "26",
-          "date": "2026-10-28T09:30:49.324Z",
+          "version": "1.0.42",
+          "buildVersion": "42",
+          "date": "2026-10-28T19:59:25.665Z",
           "localizedDescription": "Lantern browser update.",
-          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/lantern-v1.0.26/Lantern-unsigned.ipa",
-          "size": 6490571
+          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/lantern-v1.0.42/Lantern-unsigned.ipa",
+          "size": 6805221
         }
       ],
       "appPermissions": {
