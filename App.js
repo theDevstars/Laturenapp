@@ -196,6 +196,14 @@ export default function App() {
     try { await AsyncStorage.setItem(BOOKMARKS_KEY, JSON.stringify(next)); } catch (_) {}
   };
 
+  const moveBookmark = async (index, offset) => {
+    const nextIndex = index + offset;
+    if (nextIndex < 0 || nextIndex >= bookmarks.length) return;
+    const next = [...bookmarks];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    await updateBookmarks(next);
+  };
+
   const updateSetting = async (key, value) => {
     const next = { ...settings, [key]: value };
     setSettings(next);
@@ -350,13 +358,19 @@ export default function App() {
         ))}
       </View>
 
-      {bookmarks.length > 0 && (
-        <View style={styles.sectionHeading}>
-          <Text style={styles.sectionTitle}>Your saved pages</Text>
-          <Pressable onPress={() => setBookmarksVisible(true)}><Text style={styles.seeAll}>Edit</Text></Pressable>
+      <View style={styles.sectionHeading}>
+        <Text style={styles.sectionTitle}>Your bookmarks</Text>
+        <View style={styles.homeBookmarkActions}>
+          <Pressable onPress={() => openBookmarkEditor()}><Text style={styles.seeAll}>＋ Add</Text></Pressable>
+          <Pressable onPress={() => setBookmarksVisible(true)}><Text style={styles.seeAll}>Manage</Text></Pressable>
         </View>
+      </View>
+      {bookmarks.length === 0 && (
+        <Pressable onPress={() => openBookmarkEditor()} style={styles.bookmarkEmptyHome}>
+          <Text style={styles.bookmarkEmptyText}>＋ Add a bookmark to your start page</Text>
+        </Pressable>
       )}
-      {bookmarks.slice(0, 3).map((item) => (
+      {bookmarks.map((item) => (
         <Pressable key={item.id} onPress={() => openSavedPage(item)} style={styles.savedHomeRow}>
           <Text style={styles.savedHomeMark}>↗</Text>
           <View style={styles.savedHomeCopy}>
@@ -481,7 +495,7 @@ export default function App() {
                   <Text style={styles.emptyTitle}>Nothing saved yet</Text>
                   <Text style={styles.emptyText}>Save the page you’re on, or add a web address to get started.</Text>
                 </View>
-              ) : bookmarks.map((item) => (
+              ) : bookmarks.map((item, index) => (
                 <View key={item.id} style={styles.bookmarkRow}>
                   <Pressable onPress={() => openSavedPage(item)} style={styles.bookmarkMain}>
                     <Text style={styles.bookmarkMark}>↗</Text>
@@ -490,9 +504,17 @@ export default function App() {
                       <Text numberOfLines={1} style={styles.bookmarkUrl}>{item.url.replace(/^https?:\/\//, '')}</Text>
                     </View>
                   </Pressable>
-                  <Pressable onPress={() => openBookmarkEditor(item)} style={styles.editButton} accessibilityRole="button" accessibilityLabel={'Edit ' + item.name}>
-                    <Text style={styles.editButtonText}>Edit</Text>
-                  </Pressable>
+                  <View style={styles.bookmarkOrderActions}>
+                    <Pressable onPress={() => moveBookmark(index, -1)} style={styles.orderButton} accessibilityLabel={'Move ' + item.name + ' up'}>
+                      <Text style={styles.orderButtonText}>↑</Text>
+                    </Pressable>
+                    <Pressable onPress={() => moveBookmark(index, 1)} style={styles.orderButton} accessibilityLabel={'Move ' + item.name + ' down'}>
+                      <Text style={styles.orderButtonText}>↓</Text>
+                    </Pressable>
+                    <Pressable onPress={() => openBookmarkEditor(item)} style={styles.editButton} accessibilityRole="button" accessibilityLabel={'Edit ' + item.name}>
+                      <Text style={styles.editButtonText}>Edit</Text>
+                    </Pressable>
+                  </View>
                 </View>
               ))}
             </ScrollView>
@@ -676,6 +698,9 @@ const styles = StyleSheet.create({
   sectionTitle: { color: '#f2f3f5', fontSize: 16, fontWeight: '700' },
   sectionHint: { color: '#8190a8', fontSize: 11 },
   seeAll: { color: '#e8b76d', fontWeight: '700', fontSize: 12 },
+  homeBookmarkActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  bookmarkEmptyHome: { borderWidth: 1, borderColor: '#293752', borderStyle: 'dashed', borderRadius: 14, padding: 14, marginBottom: 8 },
+  bookmarkEmptyText: { color: '#aab6c9', fontSize: 12, textAlign: 'center' },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
   quickCard: { width: '48%', minHeight: 65, flexDirection: 'row', alignItems: 'center', backgroundColor: '#121c2f', borderWidth: 1, borderColor: '#202d43', borderRadius: 15, paddingHorizontal: 10, paddingVertical: 9, gap: 8 },
   quickMark: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
@@ -707,7 +732,10 @@ const styles = StyleSheet.create({
   bookmarkCopy: { flex: 1, minWidth: 0 },
   bookmarkTitle: { color: '#edf0f4', fontSize: 13, fontWeight: '700' },
   bookmarkUrl: { color: '#8795aa', fontSize: 10, marginTop: 3 },
-  editButton: { paddingVertical: 8, paddingHorizontal: 11 },
+  bookmarkOrderActions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  orderButton: { minWidth: 28, minHeight: 34, alignItems: 'center', justifyContent: 'center' },
+  orderButtonText: { color: '#aab6c9', fontSize: 16, fontWeight: '700' },
+  editButton: { paddingVertical: 8, paddingHorizontal: 9 },
   editButtonText: { color: '#e8b76d', fontWeight: '700', fontSize: 12 },
   emptyState: { alignItems: 'center', paddingHorizontal: 22, paddingVertical: 34 },
   emptyGlyph: { color: '#e8b76d', fontSize: 26, marginBottom: 7 },
