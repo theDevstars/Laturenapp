@@ -1,6 +1,6 @@
 {
   "name": "lantern-desktop",
-  "version": "1.0.0",
+  "version": "1.0.10",
   "description": "Lantern browser with Daily Bible Verse",
   "main": "main.js",
   "author": "Lantern",
@@ -23,7 +23,9 @@
       "index.html"
     ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "artifactName": "Lantern-Setup-${version}.${ext}"
     },
     "nsis": {
