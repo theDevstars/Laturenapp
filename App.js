@@ -51,60 +51,33 @@ const QUICK_LINKS = [
   { title: 'Bible Gateway', subtitle: 'Read', url: 'https://www.biblegateway.com', mark: '✦', color: '#efb35f' },
 ];
 
-const DAILY_VERSES = [
-  {
-    "reference": "Psalm 91:1–2",
-    "text": "He who dwells in the secret place of the Most High\nwill rest in the shadow of the Almighty.\n\nI will say of Yahweh, “He is my refuge and my fortress;\nmy God, in whom I trust.”"
-  },
-  {
-    "reference": "Psalm 23:1",
-    "text": "Yahweh is my shepherd;\nI shall lack nothing."
-  },
-  {
-    "reference": "Psalm 46:1",
-    "text": "God is our refuge and strength,\na very present help in trouble."
-  },
-  {
-    "reference": "Psalm 121:1–2",
-    "text": "I will lift up my eyes to the hills.\nWhere does my help come from?\nMy help comes from Yahweh,\nwho made heaven and earth."
-  },
-  {
-    "reference": "Proverbs 3:5–6",
-    "text": "Trust in Yahweh with all your heart,\nand don’t lean on your own understanding.\nIn all your ways acknowledge him,\nand he will make your paths straight."
-  },
-  {
-    "reference": "Isaiah 41:10",
-    "text": "Don’t you be afraid, for I am with you.\nDon’t be dismayed, for I am your God.\nI will strengthen you.\nYes, I will help you.\nYes, I will uphold you with the right hand of my righteousness."
-  },
-  {
-    "reference": "Matthew 6:34",
-    "text": "Therefore don’t be anxious for tomorrow, for tomorrow will be anxious for itself. Each day’s own evil is sufficient."
-  },
-  {
-    "reference": "Matthew 11:28",
-    "text": "Come to me, all you who labor and are heavily burdened, and I will give you rest."
-  },
-  {
-    "reference": "John 14:27",
-    "text": "Peace I leave with you. My peace I give to you; not as the world gives, I give to you. Don’t let your heart be troubled, neither let it be fearful."
-  },
-  {
-    "reference": "Romans 8:28",
-    "text": "We know that all things work together for good for those who love God, for those who are called according to his purpose."
-  },
-  {
-    "reference": "Philippians 4:6–7",
-    "text": "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts in Christ Jesus."
-  },
-  {
-    "reference": "Joshua 1:9",
-    "text": "Haven’t I commanded you? Be strong and courageous. Don’t be afraid. Don’t be dismayed, for Yahweh your God is with you wherever you go."
-  },
-  {
-    "reference": "1 Peter 5:7",
-    "text": "Casting all your worries on him, because he cares for you."
+// A 365-day cycle of distinct Bible references (one verse from each chapter).
+// Verse text is loaded and cached from Bible-API when the day changes.
+const DAILY_VERSES = (() => {
+  const books = [
+    ['Genesis',50],['Exodus',40],['Leviticus',27],['Numbers',36],['Deuteronomy',34],
+    ['Joshua',24],['Judges',21],['Ruth',4],['1 Samuel',31],['2 Samuel',24],
+    ['1 Kings',22],['2 Kings',25],['1 Chronicles',29],['2 Chronicles',36],['Ezra',10],
+    ['Nehemiah',13],['Esther',10],['Job',42],['Psalms',150],['Proverbs',31],
+    ['Ecclesiastes',12],['Song of Solomon',8],['Isaiah',66],['Jeremiah',52],['Lamentations',5],
+    ['Ezekiel',48],['Daniel',12],['Hosea',14],['Joel',3],['Amos',9],['Obadiah',1],
+    ['Jonah',4],['Micah',7],['Nahum',3],['Habakkuk',3],['Zephaniah',3],
+    ['Haggai',2],['Zechariah',14],['Malachi',4],['Matthew',28],['Mark',16],
+    ['Luke',24],['John',21],['Acts',28],['Romans',16],['1 Corinthians',16],
+    ['2 Corinthians',13],['Galatians',6],['Ephesians',6],['Philippians',4],['Colossians',4],
+    ['1 Thessalonians',5],['2 Thessalonians',3],['1 Timothy',6],['2 Timothy',4],['Titus',3],
+    ['Philemon',1],['Hebrews',13],['James',5],['1 Peter',5],['2 Peter',3],
+    ['1 John',5],['2 John',1],['3 John',1],['Jude',1],['Revelation',22]
+  ];
+  const references = [];
+  for (const [book, chapters] of books) {
+    for (let chapter = 1; chapter <= chapters && references.length < 365; chapter++) {
+      references.push({ reference: book + ' ' + chapter + ':1', text: '' });
+    }
+    if (references.length === 365) break;
   }
-];
+  return references;
+})();
 
 const KJV_TEXT = {
   'Psalm 91:1–2': 'He that dwelleth in the secret place of the most High\nshall abide under the shadow of the Almighty.\n\nI will say of the LORD, He is my refuge and my fortress:\nmy God; in him will I trust.',
@@ -323,8 +296,8 @@ export default function App() {
   const trMeta = TRANSLATIONS.find((item) => item.id === tr) || apiBibles.find((item) => item.id === tr);
   const trLabel = trMeta ? trMeta.label : 'WEB';
   const showKjv = tr === 'kjv' && !!KJV_TEXT[dailyVerse.reference];
-  const remoteReady = tr !== 'web' && tr !== 'kjv' && remote.key === trKey && !!remote.text;
-  const verseText = showKjv ? KJV_TEXT[dailyVerse.reference] : remoteReady ? remote.text : dailyVerse.text;
+  const remoteReady = !(tr === 'kjv' && !!KJV_TEXT[dailyVerse.reference]) && remote.key === trKey && !!remote.text;
+  const verseText = showKjv ? KJV_TEXT[dailyVerse.reference] : remoteReady ? remote.text : (dailyVerse.text || (remote.loading && remote.key === trKey ? 'Loading today’s verse…' : 'Connect to the internet to load today’s verse.'));
   const verseVersion = showKjv ? 'KJV' : remoteReady ? trLabel : 'WEB';
   const verseNote = remote.key === trKey && remote.loading
     ? 'Loading ' + trLabel + '…'
@@ -334,7 +307,7 @@ export default function App() {
   const linkVersion = tr === 'web' ? 'WEB' : tr === 'kjv' ? 'KJV' : tr.indexOf('api:') === 0 && trMeta ? (trMeta.label === 'NASB' ? 'NASB1995' : trMeta.label) : '';
 
   useEffect(() => {
-    if (tr === 'web' || tr === 'kjv') {
+    if (tr === 'kjv' && KJV_TEXT[dailyVerse.reference]) {
       setRemote({ key: trKey, text: '', failed: false, loading: false });
       return undefined;
     }
