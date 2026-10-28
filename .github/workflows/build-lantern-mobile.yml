@@ -7,6 +7,7 @@ on:
       - "app.json"
       - "App.js"
       - "assets/icon.png"
+      - "desktop/index.html"
 
 permissions:
   contents: write
@@ -122,11 +123,11 @@ jobs:
           tag_name: lantern-v1.0.${{ github.run_number }}
           name: Lantern v1.0.${{ github.run_number }} - Bible Verse Update
           body: |
-            Lantern browser app including the Psalm 91:1–2 Daily Bible Verse section.
+            Lantern browser with a DuckDuckGo home screen, optional daily rotating Bible verse, saved pages, and security settings.
 
             Assets:
             - Android APK: intended for Android devices.
-            - Windows EXE installer: desktop browser with the Daily Bible Verse.
+            - Windows EXE installer: Lantern desktop browser with the DuckDuckGo home screen and daily verse settings.
             - iOS IPA: unsigned build; standard iPhone installation requires Apple code signing.
           prerelease: true
           files: release-files/*
