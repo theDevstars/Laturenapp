@@ -57,11 +57,13 @@ jobs:
       - name: Package IPA
         run: |
           echo "Searching for the built iOS app bundle..."
-          APP_PATH=$(find ios/build -type d -name '*.app' -not -path '*/Index.noindex/*' -print -quit)
+          echo "Searching for the built iOS app bundle..."
+          APP_PATH=$(find ios -type d -name '*.app' -not -path '*/Index.noindex/*' -print -quit 2>/dev/null)
           if [ -z "$APP_PATH" ] || [ ! -d "$APP_PATH" ]; then
-            echo "ERROR: No .app bundle was found under ios/build."
-            echo "Available build output directories:"
-            find ios/build -maxdepth 5 -type d -print 2>/dev/null | head -200 || true
+            echo "ERROR: No .app bundle was found under ios/."
+            echo "Searching the repository for app bundles and showing build output:"
+            find . -type d -name '*.app' -not -path './node_modules/*' -not -path './.git/*' -print 2>/dev/null | head -50 || true
+            find ios -maxdepth 6 -type d -print 2>/dev/null | tail -100 || true
             exit 1
           fi
           echo "Packaging app bundle: $APP_PATH"
