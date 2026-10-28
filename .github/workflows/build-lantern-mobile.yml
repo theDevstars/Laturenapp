@@ -1,4 +1,4 @@
-name: Build Lantern IPA, APK and EXE
+name: Build Saturn IPA, APK and EXE
 
 on:
   workflow_dispatch:
@@ -7,6 +7,7 @@ on:
       - "app.json"
       - "App.js"
       - "assets/icon.png"
+      - "assets/saturn-icon.svg"
       - "desktop/index.html"
 
 permissions:
@@ -24,6 +25,10 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Generate Saturn app icon
+        run: |
+          npm install --no-save sharp
+          node -e "require('sharp')('assets/saturn-icon.svg').resize(1024,1024).png().toFile('assets/icon.png')"
       - name: Set native app version for this build
         env:
           BUILD_NUMBER: ${{ github.run_number }}
@@ -34,10 +39,10 @@ jobs:
       - name: Build iOS app
         run: |
           cd ios
-          xcodebuild -workspace *.xcworkspace -scheme Lantern -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -workspace *.xcworkspace -scheme Saturn -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
       - name: Package IPA
         run: |
-          APP_PATH="ios/build/Build/Products/Release-iphoneos/Lantern.app"
+          APP_PATH="ios/build/Build/Products/Release-iphoneos/Saturn.app"
           test -d "$APP_PATH"
           mkdir -p Payload
           cp -R "$APP_PATH" Payload/
