@@ -34,6 +34,8 @@ const DEFAULT_SETTINGS = {
   javaScriptEnabled: true,
   allowPopups: false,
   privateBrowsing: false,
+  blockThirdPartyCookies: true,
+  domStorageEnabled: true,
   showDailyVerse: true,
   quickPaths: { DuckDuckGo: false, YouTube: false, Wikipedia: false, 'Bible Gateway': false },
   verseTranslation: 'web',
@@ -559,6 +561,20 @@ export default function App() {
         </>
       )}
 
+      <View style={styles.privacySnapshot}>
+        <View style={styles.privacySnapshotIcon}><Text style={styles.privacySnapshotGlyph}>✦</Text></View>
+        <View style={styles.privacySnapshotCopy}>
+          <Text style={styles.privacySnapshotTitle}>Your privacy, at a glance</Text>
+          <Text style={styles.privacySnapshotBody}>
+            {settings.privateBrowsing ? 'Private browsing is on for this session.' : 'Private browsing is off.'}
+            {' '}{settings.blockThirdPartyCookies ? 'Third-party cookies are blocked.' : 'Third-party cookies are allowed.'}
+          </Text>
+        </View>
+        <Pressable onPress={() => setSettingsVisible(true)} accessibilityRole="button" accessibilityLabel="Open privacy settings" style={styles.privacySnapshotAction}>
+          <Text style={styles.privacySnapshotActionText}>Review</Text>
+        </Pressable>
+      </View>
+
       <View style={styles.sectionHeading}>
         <Text style={styles.sectionTitle}>Your bookmarks</Text>
         <View style={styles.homeBookmarkActions}>
@@ -663,13 +679,13 @@ export default function App() {
           }}
           onShouldStartLoadWithRequest={guardRequest}
           javaScriptEnabled={settings.javaScriptEnabled}
-          domStorageEnabled
+          domStorageEnabled={settings.domStorageEnabled}
           javaScriptCanOpenWindowsAutomatically={settings.allowPopups}
           setSupportMultipleWindows={settings.allowPopups}
           allowFileAccess={false}
           allowUniversalAccessFromFileURLs={false}
           mixedContentMode={settings.preferHttps ? 'never' : 'compatibility'}
-          thirdPartyCookiesEnabled={false}
+          thirdPartyCookiesEnabled={!settings.blockThirdPartyCookies}
           sharedCookiesEnabled={false}
           allowsBackForwardNavigationGestures
           style={styles.web}
@@ -875,7 +891,11 @@ export default function App() {
                 <View style={styles.settingDivider} />
                 <SettingRow title="Allow pop-up windows" detail="Keep pop-ups blocked unless a site you trust needs them." value={settings.allowPopups} onValueChange={(value) => updateSetting('allowPopups', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Private browsing" detail="Don’t keep cookies or site data after you close Lantern." value={settings.privateBrowsing} onValueChange={(value) => updateSetting('privateBrowsing', value)} />
+                <SettingRow title="Private browsing" detail="Use an isolated, non-persistent website session where the platform supports it." value={settings.privateBrowsing} onValueChange={(value) => updateSetting('privateBrowsing', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Block third-party cookies" detail="Prevent embedded third-party sites from setting cookies in the browser view." value={settings.blockThirdPartyCookies} onValueChange={(value) => updateSetting('blockThirdPartyCookies', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Website storage" detail="Allow sites to remember preferences and keep you signed in. Some sites need this enabled." value={settings.domStorageEnabled} onValueChange={(value) => updateSetting('domStorageEnabled', value)} />
               </View>
 
               <View style={styles.privacyNote}>
@@ -884,8 +904,8 @@ export default function App() {
                   <Text style={styles.privacyNoteTitle}>Built for a little more privacy</Text>
                   <Text style={styles.privacyNoteBody}>
                     {Platform.OS === 'android'
-                      ? 'Saturn blocks local-file access and third-party cookies. Search stays with your selected provider.'
-                      : 'Lantern blocks local-file access. On iPhone, turn on Private browsing to avoid keeping cookies and site data. Search stays with your selected provider.'}
+                      ? 'Saturn blocks local-file access. Third-party cookies are ' + (settings.blockThirdPartyCookies ? 'blocked' : 'allowed') + '. Search stays with your selected provider.'
+                      : 'Saturn blocks local-file access. Third-party cookies are ' + (settings.blockThirdPartyCookies ? 'blocked' : 'allowed') + '. Private browsing uses the WebView private-session option, whose behavior can vary by iOS version. Search stays with your selected provider.'}
                   </Text>
                 </View>
               </View>
@@ -981,6 +1001,14 @@ const styles = StyleSheet.create({
   savedHomeCopy: { flex: 1 },
   savedHomeTitle: { color: '#e8edf5', fontSize: 13, fontWeight: '700' },
   savedHomeUrl: { color: '#8090a6', fontSize: 12, marginTop: 2 },
+  privacySnapshot: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 20, padding: 13, borderRadius: 16, backgroundColor: '#142b2e', borderWidth: 1, borderColor: '#244849' },
+  privacySnapshotIcon: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#20413f' },
+  privacySnapshotGlyph: { color: '#8bd1b1', fontSize: 18 },
+  privacySnapshotCopy: { flex: 1, minWidth: 0 },
+  privacySnapshotTitle: { color: '#d9f0e4', fontSize: 13, fontWeight: '800' },
+  privacySnapshotBody: { color: '#98b9aa', fontSize: 11, lineHeight: 16, marginTop: 3 },
+  privacySnapshotAction: { paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, backgroundColor: '#254441' },
+  privacySnapshotActionText: { color: '#c6ead9', fontSize: 12, fontWeight: '800' },
   footerNote: { color: '#64738a', fontSize: 11, letterSpacing: 1.1, textAlign: 'center', marginTop: 20 },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(3,8,17,0.7)', justifyContent: 'flex-end' },
   sheetKeyboard: { width: '100%' },
