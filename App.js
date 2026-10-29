@@ -746,18 +746,41 @@ export default function App() {
         />
       ) : renderHome()}
 
-      <View style={styles.bottomDock} accessibilityLabel="Browser dock">
+      <View style={[styles.bottomDock, url && styles.bottomDockBrowsing]} accessibilityLabel="Browser dock">
         <Pressable onPress={goHome} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Home">
-          <Text style={styles.dockGlyph}>⌂</Text><Text style={styles.dockLabel}>Home</Text>
+          <Text style={styles.dockGlyph}>⌂</Text>
         </Pressable>
-        <Pressable onPress={() => { setUrl(null); setAddress(''); }} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Search">
-          <Text style={styles.dockGlyph}>⌕</Text><Text style={styles.dockLabel}>Search</Text>
-        </Pressable>
+        {url ? (
+          <View style={styles.safariAddressBar}>
+            <Text style={styles.safariLock}>⌑</Text>
+            <TextInput
+              value={address}
+              onChangeText={setAddress}
+              onSubmitEditing={() => navigate()}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType={Platform.OS === 'ios' ? 'web-search' : 'default'}
+              returnKeyType="go"
+              selectTextOnFocus
+              placeholder="Search or enter website"
+              placeholderTextColor="#8995aa"
+              style={styles.safariAddressInput}
+              accessibilityLabel="Search or enter a website"
+            />
+            <Pressable onPress={() => web.current?.reload()} style={styles.safariReload} accessibilityRole="button" accessibilityLabel="Reload page">
+              <Text style={styles.safariReloadGlyph}>↻</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable onPress={() => { setUrl(null); setAddress(''); }} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Search">
+            <Text style={styles.dockGlyph}>⌕</Text><Text style={styles.dockLabel}>Search</Text>
+          </Pressable>
+        )}
         <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
-          <Text style={styles.dockGlyph}>▤</Text><Text style={styles.dockLabel}>Saved</Text>
+          <Text style={styles.dockGlyph}>▤</Text>{!url && <Text style={styles.dockLabel}>Saved</Text>}
         </Pressable>
         <Pressable onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Settings">
-          <Text style={styles.dockGlyph}>⚙</Text><Text style={styles.dockLabel}>Settings</Text>
+          <Text style={styles.dockGlyph}>⚙</Text>{!url && <Text style={styles.dockLabel}>Settings</Text>}
         </Pressable>
       </View>
 
@@ -1086,6 +1109,12 @@ const styles = StyleSheet.create({
   searchButtonText: { color: '#192235', fontWeight: '800', fontSize: 13 },
   navRow: { minHeight: 46, paddingHorizontal: 18, paddingVertical: 4, flexDirection: 'row', alignItems: 'center', gap: 8 },
   bottomDock: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginHorizontal: 22, marginTop: 5, marginBottom: Platform.OS === 'ios' ? 8 : 10, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 23, backgroundColor: 'rgba(23, 34, 56, 0.97)', borderWidth: 1, borderColor: '#35435c', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
+  bottomDockBrowsing: { marginHorizontal: 12, paddingHorizontal: 7, gap: 5 },
+  safariAddressBar: { flex: 1, minWidth: 0, height: 42, flexDirection: 'row', alignItems: 'center', backgroundColor: '#0d1728', borderWidth: 1, borderColor: '#3b4961', borderRadius: 15, paddingLeft: 10, paddingRight: 4, gap: 5 },
+  safariLock: { color: '#8bd1b1', fontSize: 17 },
+  safariAddressInput: { flex: 1, minWidth: 0, paddingVertical: 4, color: '#f3f5f8', fontSize: 13 },
+  safariReload: { width: 32, height: 32, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  safariReloadGlyph: { color: '#e6b366', fontSize: 23, lineHeight: 26 },
   dockItem: { minWidth: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, paddingVertical: 3, gap: 2 },
   dockGlyph: { color: '#e6b366', fontSize: 20, lineHeight: 23 },
   dockLabel: { color: '#bac4d5', fontSize: 10, fontWeight: '700' },
