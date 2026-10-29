@@ -624,8 +624,6 @@ export default function App() {
         <Pressable onPress={() => setSettingsVisible(true)} accessibilityRole="button" accessibilityLabel="Open privacy settings" style={styles.privacySnapshotAction}>
           <Text style={styles.privacySnapshotActionText}>Review</Text>
         </Pressable>
-      </View>
-
       </View>}
       <View style={styles.sectionHeading}>
         <Text style={styles.sectionTitle}>Your bookmarks</Text>
