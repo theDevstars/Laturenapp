@@ -589,7 +589,7 @@ export default function App() {
   };
 
   const renderHome = () => (
-    <ScrollView style={styles.homeScroll} contentContainerStyle={[styles.homeContent, settings.compactHome && styles.homeContentCompact]] keyboardShouldPersistTaps="handled">
+    <ScrollView style={styles.homeScroll} contentContainerStyle={[styles.homeContent, settings.compactHome && styles.homeContentCompact]} keyboardShouldPersistTaps="handled">
       {settings.showWelcome !== false && <View style={styles.welcomeBlock}>
         <Text style={styles.eyebrow}>YOUR SPACE ON THE WEB</Text>
         <Text style={[styles.welcomeTitle, settings.compactHome && styles.welcomeTitleCompact]}>A little light{ '\n' }for the way ahead.</Text>
