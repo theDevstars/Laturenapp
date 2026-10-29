@@ -666,16 +666,6 @@ export default function App() {
             <Text style={styles.brandTagline}>Browse with a little more calm</Text>
           </View>
         </View>
-        <View style={styles.headerActions}>
-          <Pressable onPress={() => setBookmarksVisible(true)} style={styles.headerAction}>
-            <Text style={styles.headerActionGlyph}>▤</Text>
-            <Text style={styles.headerActionText}>Saved</Text>
-          </Pressable>
-          <Pressable onPress={() => setSettingsVisible(true)} style={styles.headerAction}>
-            <Text style={styles.headerActionGlyph}>⚙</Text>
-            <Text style={styles.headerActionText}>Settings</Text>
-          </Pressable>
-        </View>
       </View>
       )}
 
