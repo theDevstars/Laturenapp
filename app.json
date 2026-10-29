@@ -11,7 +11,16 @@
       "bundleIdentifier": "com.yourname.lantern",
       "buildNumber": "10",
       "infoPlist": {
-        "CFBundleDisplayName": "Saturn"
+        "CFBundleDisplayName": "Saturn",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "com.yourname.lantern.browser",
+            "CFBundleURLSchemes": [
+              "http",
+              "https"
+            ]
+          }
+        ]
       }
     },
     "android": {
