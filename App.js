@@ -657,6 +657,7 @@ export default function App() {
     >
     <SafeAreaView style={[styles.safeRoot, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight || 0 }]}>
       <NativeStatusBar barStyle="light-content" backgroundColor="#0b1220" />
+      {!url && (
       <View style={styles.header}>
         <View style={styles.brand}>
           <Image source={require('./assets/icon.png')} style={styles.brandIcon} />
@@ -676,6 +677,7 @@ export default function App() {
           </Pressable>
         </View>
       </View>
+      )}
 
       {!url && (
         <View style={styles.searchRow}>
@@ -699,6 +701,7 @@ export default function App() {
         </View>
       )}
 
+      {!url && (
       <View style={styles.navRow}>
         <IconButton label="Go back" glyph="‹" onPress={() => web.current?.goBack()} secondary />
         <IconButton label="Go forward" glyph="›" onPress={() => web.current?.goForward()} secondary />
@@ -712,6 +715,7 @@ export default function App() {
           <View style={styles.searchHint}><Text style={styles.searchHintText}>Search with {settings.searchEngine}</Text></View>
         )}
       </View>
+      )}
 
       {loading && <ActivityIndicator color="#e5ad62" style={styles.progress} />}
       {url ? (
