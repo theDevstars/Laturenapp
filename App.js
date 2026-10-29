@@ -272,6 +272,7 @@ export default function App() {
   const [remote, setRemote] = useState({ key: '', text: '', failed: false, loading: false });
   const [bookmarksVisible, setBookmarksVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [settingsCategory, setSettingsCategory] = useState(null);
   const [setupVisible, setSetupVisible] = useState(false);
   const [editorVisible, setEditorVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -908,16 +909,36 @@ export default function App() {
       <Modal visible={settingsVisible} animationType="slide" transparent={false} presentationStyle="fullScreen" onRequestClose={() => setSettingsVisible(false)}>
         <SafeAreaView style={styles.settingsPage}>
           <View style={styles.settingsPageHeader}>
-            <Pressable onPress={() => setSettingsVisible(false)} style={({ pressed }) => [styles.settingsBackButton, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Back to Saturn">
+            <Pressable onPress={() => { if (settingsCategory) setSettingsCategory(null); else setSettingsVisible(false); }} style={({ pressed }) => [styles.settingsBackButton, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Back to Saturn">
               <Text style={styles.settingsBackGlyph}>‹</Text>
             </Pressable>
             <View style={styles.settingsPageHeading}>
-              <Text style={styles.settingsPageTitle}>Settings</Text>
-              <Text style={styles.settingsPageSubtitle}>Make Saturn work your way</Text>
+              <Text style={styles.settingsPageTitle}>{settingsCategory || 'Settings'}</Text>
+              <Text style={styles.settingsPageSubtitle}>{settingsCategory ? 'Customize this part of Saturn' : 'Make Saturn work your way'}</Text>
             </View>
             <Image source={require('./assets/icon.png')} style={styles.settingsPageIcon} />
           </View>
           <ScrollView style={styles.settingsScroll} contentContainerStyle={styles.settingsPageContent} keyboardShouldPersistTaps="handled">
+            {!settingsCategory ? (
+              <View style={styles.settingsCategoryList}>
+                {[
+                  { title: 'Customization', detail: 'Themes, home screen, dock, layout and Bible display', icon: '✦' },
+                  { title: 'Search', detail: 'Choose your search engine and search behavior', icon: '⌕' },
+                  { title: 'Passwords', detail: 'Choose and open your password manager', icon: '▣' },
+                  { title: 'Extensions & tools', detail: 'Choose web tools and extension directories', icon: '⌘' },
+                  { title: 'Security & privacy', detail: 'Tracking protection, cookies and secure browsing', icon: '◈' },
+                  { title: 'Browsing data', detail: 'Clear browser history and cached data', icon: '⌫' },
+                ].map((item) => (
+                  <Pressable key={item.title} onPress={() => setSettingsCategory(item.title)} style={({ pressed }) => [styles.settingsCategoryCard, pressed && styles.pressed]}>
+                    <View style={styles.settingsCategoryIcon}><Text style={styles.settingsCategoryGlyph}>{item.icon}</Text></View>
+                    <View style={styles.settingsCategoryCopy}><Text style={styles.settingsCategoryTitle}>{item.title}</Text><Text style={styles.settingsCategoryDetail}>{item.detail}</Text></View>
+                    <Text style={styles.settingsCategoryChevron}>›</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <>
+                {settingsCategory === 'Customization' && (<>
               <Text style={styles.settingsSectionTitle}>Interface controls</Text>
               <Text style={styles.settingsIntro}>Choose exactly what stays on screen. Hide Everything keeps a small Settings button available so you can restore your layout.</Text>
               <View style={styles.backgroundActions}>
@@ -1021,6 +1042,8 @@ export default function App() {
                 </Pressable>
               </View>
 
+                </>)}
+                {settingsCategory === 'Search' && <>
               <Text style={styles.settingsSectionTitle}>Search</Text>
               <Text style={styles.settingsIntro}>Choose where Lantern sends search terms. Bang shortcuts like !w and !yt use DuckDuckGo.</Text>
               <View style={styles.engineOptions}>
@@ -1036,6 +1059,8 @@ export default function App() {
                 ))}
               </View>
 
+                </>}
+                {settingsCategory === 'Passwords' && <>
               <Text style={styles.settingsSectionTitle}>Passwords</Text>
               <Text style={styles.settingsIntro}>Choose a password manager, then open it. Saturn does not store your vault or provide native iPhone AutoFill.</Text>
               <View style={styles.settingsCard}>
@@ -1070,6 +1095,8 @@ export default function App() {
                 </Pressable>
               </View>
 
+                </>}
+                {settingsCategory === 'Extensions & tools' && <>
               <Text style={styles.settingsSectionTitle}>Extensions & tools</Text>
               <Text style={styles.settingsIntro}>Choose a web tool or extension directory. iOS WebView does not install desktop browser extensions, so these open as websites instead.</Text>
               <View style={styles.settingsCard}>
@@ -1104,6 +1131,8 @@ export default function App() {
                 </Pressable>
               </View>
 
+                </>}
+                {settingsCategory === 'Security & privacy' && <>
               <Text style={styles.settingsSectionTitle}>Security</Text>
               <View style={styles.settingsCard}>
                 <SettingRow title="Block ads and trackers (basic)" detail="Blocks requests to a small list of known ad/tracker hosts and hides some common ad elements. This is not the full uBlock Origin extension." value={settings.blockAds} onValueChange={(value) => updateSetting('blockAds', value)} />
@@ -1133,6 +1162,8 @@ export default function App() {
                 </View>
               </View>
 
+                </>}
+                {settingsCategory === 'Browsing data' && <>
               <Text style={styles.settingsSectionTitle}>Browsing data</Text>
               <Text style={styles.settingsIntro}>
                 {Platform.OS === 'android'
@@ -1143,6 +1174,9 @@ export default function App() {
                 <Text style={styles.clearDataGlyph}>⌫</Text>
                 <Text style={styles.clearDataText}>{Platform.OS === 'android' ? 'Clear cache and history' : 'Clear history'}</Text>
               </Pressable>
+                </>}
+              </>
+            )}
           </ScrollView>
         </SafeAreaView>
       </Modal>
@@ -1280,6 +1314,14 @@ const styles = StyleSheet.create({
   removeButton: { alignItems: 'center', paddingVertical: 14 },
   removeButtonText: { color: '#e58c87', fontSize: 13, fontWeight: '700' },
   settingsPage: { flex: 1, backgroundColor: '#0b1220' },
+  settingsCategoryList: { gap: 11 },
+  settingsCategoryCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#131e30', borderWidth: 1, borderColor: '#29374d', borderRadius: 17, padding: 15, gap: 13 },
+  settingsCategoryIcon: { width: 42, height: 42, borderRadius: 13, backgroundColor: '#202e43', alignItems: 'center', justifyContent: 'center' },
+  settingsCategoryGlyph: { color: '#e8b76d', fontSize: 22, fontWeight: '700' },
+  settingsCategoryCopy: { flex: 1, gap: 4 },
+  settingsCategoryTitle: { color: '#f2f5fa', fontSize: 15, fontWeight: '700' },
+  settingsCategoryDetail: { color: '#93a2b8', fontSize: 12, lineHeight: 17 },
+  settingsCategoryChevron: { color: '#8b9bb2', fontSize: 27, paddingLeft: 5 },
   settingsPageHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 12, paddingBottom: 18, borderBottomWidth: 1, borderBottomColor: '#263248', gap: 12 },
   settingsBackButton: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#172238', borderWidth: 1, borderColor: '#293752' },
   settingsBackGlyph: { color: '#e8b76d', fontSize: 34, lineHeight: 38, marginTop: -3 },
