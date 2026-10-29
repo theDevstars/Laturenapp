@@ -677,25 +677,27 @@ export default function App() {
         </View>
       </View>
 
-      <View style={styles.searchRow}>
-        <TextInput
-          value={address}
-          onChangeText={setAddress}
-          onSubmitEditing={() => navigate()}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType={Platform.OS === 'ios' ? 'web-search' : 'default'}
-          returnKeyType="search"
-          selectTextOnFocus
-          placeholder="Search or try !w / !yt"
-          placeholderTextColor="#8995aa"
-          style={styles.addressInput}
-          accessibilityLabel="Search or enter a website"
-        />
-        <Pressable onPress={() => navigate()} style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
-          <Text style={styles.searchButtonText}>Go</Text>
-        </Pressable>
-      </View>
+      {!url && (
+        <View style={styles.searchRow}>
+          <TextInput
+            value={address}
+            onChangeText={setAddress}
+            onSubmitEditing={() => navigate()}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType={Platform.OS === 'ios' ? 'web-search' : 'default'}
+            returnKeyType="search"
+            selectTextOnFocus
+            placeholder="Search or try !w / !yt"
+            placeholderTextColor="#8995aa"
+            style={styles.addressInput}
+            accessibilityLabel="Search or enter a website"
+          />
+          <Pressable onPress={() => navigate()} style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
+            <Text style={styles.searchButtonText}>Go</Text>
+          </Pressable>
+        </View>
+      )}
 
       <View style={styles.navRow}>
         <IconButton label="Go back" glyph="‹" onPress={() => web.current?.goBack()} secondary />
@@ -744,7 +746,7 @@ export default function App() {
         <Pressable onPress={goHome} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Home">
           <Text style={styles.dockGlyph}>⌂</Text><Text style={styles.dockLabel}>Home</Text>
         </Pressable>
-        <Pressable onPress={() => { if (url) openBookmarkEditor(); else setAddress(''); }} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Search">
+        <Pressable onPress={() => { setUrl(null); setAddress(''); }} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Search">
           <Text style={styles.dockGlyph}>⌕</Text><Text style={styles.dockLabel}>Search</Text>
         </Pressable>
         <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
