@@ -42,6 +42,13 @@ const DEFAULT_SETTINGS = {
   showBrandTagline: true,
   compactHome: false,
   showDockLabels: true,
+  showHeader: true,
+  showSearchBar: true,
+  showNavigationRow: true,
+  showDock: true,
+  showWelcome: true,
+  showBookmarksSection: true,
+  showSearchFooter: true,
   quickPaths: { DuckDuckGo: false, YouTube: false, Wikipedia: false, 'Bible Gateway': false },
   verseTranslation: 'web',
   bibleKey: '',
@@ -391,6 +398,28 @@ export default function App() {
     try { await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch (_) {}
   };
 
+  const setInterfacePreset = async (visible) => {
+    const next = {
+      ...settings,
+      showHeader: visible,
+      showSearchBar: visible,
+      showNavigationRow: visible,
+      showDock: visible,
+      showWelcome: visible,
+      showDailyVerse: visible,
+      showPrivacySnapshot: visible,
+      showBrandTagline: visible,
+      showDockLabels: visible,
+      showBookmarksSection: visible,
+      showSearchFooter: visible,
+      quickPaths: visible
+        ? { DuckDuckGo: true, YouTube: true, Wikipedia: true, 'Bible Gateway': true }
+        : { DuckDuckGo: false, YouTube: false, Wikipedia: false, 'Bible Gateway': false },
+    };
+    setSettings(next);
+    try { await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch (_) {}
+  };
+
   const saveBackground = async (value) => {
     try {
       if (value) await AsyncStorage.setItem(BACKGROUND_KEY, value);
@@ -561,11 +590,11 @@ export default function App() {
 
   const renderHome = () => (
     <ScrollView style={styles.homeScroll} contentContainerStyle={[styles.homeContent, settings.compactHome && styles.homeContentCompact]] keyboardShouldPersistTaps="handled">
-      <View style={styles.welcomeBlock}>
+      {settings.showWelcome !== false && <View style={styles.welcomeBlock}>
         <Text style={styles.eyebrow}>YOUR SPACE ON THE WEB</Text>
         <Text style={[styles.welcomeTitle, settings.compactHome && styles.welcomeTitleCompact]}>A little light{ '\n' }for the way ahead.</Text>
         <Text style={styles.welcomeBody}>Search, read, and explore at your own pace.</Text>
-      </View>
+      </View>}
 
       {settings.showDailyVerse && (
         <View style={styles.verseCard}>
@@ -625,7 +654,7 @@ export default function App() {
           <Text style={styles.privacySnapshotActionText}>Review</Text>
         </Pressable>
       </View>}
-      <View style={styles.sectionHeading}>
+      {settings.showBookmarksSection !== false && <><View style={styles.sectionHeading}>
         <Text style={styles.sectionTitle}>Your bookmarks</Text>
         <View style={styles.homeBookmarkActions}>
           <Pressable onPress={() => openBookmarkEditor()}><Text style={styles.seeAll}>＋ Add</Text></Pressable>
@@ -647,7 +676,8 @@ export default function App() {
           <Text style={styles.quickArrow}>›</Text>
         </Pressable>
       ))}
-      <Text style={styles.footerNote}>SEARCH POWERED BY {settings.searchEngine.toUpperCase()}</Text>
+      </>}
+      {settings.showSearchFooter !== false && <Text style={styles.footerNote}>SEARCH POWERED BY {settings.searchEngine.toUpperCase()}</Text>}
     </ScrollView>
   );
 
@@ -660,7 +690,7 @@ export default function App() {
     >
     <SafeAreaView style={[styles.safeRoot, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight || 0 }]}>
       <NativeStatusBar barStyle="light-content" backgroundColor="#0b1220" />
-      {!url && (
+      {!url && settings.showHeader !== false && (
       <View style={styles.header}>
         <View style={styles.brand}>
           <Image source={require('./assets/icon.png')} style={styles.brandIcon} />
@@ -672,7 +702,7 @@ export default function App() {
       </View>
       )}
 
-      {!url && (
+      {!url && settings.showSearchBar !== false && (
         <View style={styles.searchRow}>
           <TextInput
             value={address}
@@ -694,7 +724,7 @@ export default function App() {
         </View>
       )}
 
-      {!url && (
+      {!url && settings.showNavigationRow !== false && (
       <View style={styles.navRow}>
         <IconButton label="Go back" glyph="‹" onPress={() => web.current?.goBack()} secondary />
         <IconButton label="Go forward" glyph="›" onPress={() => web.current?.goForward()} secondary />
@@ -739,7 +769,7 @@ export default function App() {
         />
       ) : renderHome()}
 
-      <View style={[styles.bottomDock, url && styles.bottomDockBrowsing]} accessibilityLabel="Browser dock">
+      {settings.showDock !== false ? <View style={[styles.bottomDock, url && styles.bottomDockBrowsing]} accessibilityLabel="Browser dock">
         <Pressable onPress={goHome} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Home">
           <Text style={styles.dockGlyph}>⌂</Text>
         </Pressable>
@@ -780,7 +810,7 @@ export default function App() {
         <Pressable onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Settings">
           <Text style={styles.dockGlyph}>⚙</Text>{!url && settings.showDockLabels !== false && <Text style={styles.dockLabel}>Settings</Text>}
         </Pressable>
-      </View>
+      </View> : <Pressable onPress={() => setSettingsVisible(true)} style={styles.hiddenSettingsButton} accessibilityRole="button" accessibilityLabel="Open Settings"><Text style={styles.dockGlyph}>⚙</Text></Pressable>}
 
       <Modal visible={bookmarksVisible} animationType="slide" transparent onRequestClose={() => setBookmarksVisible(false)}>
         <View style={styles.modalBackdrop}>
@@ -888,6 +918,28 @@ export default function App() {
             <Image source={require('./assets/icon.png')} style={styles.settingsPageIcon} />
           </View>
           <ScrollView style={styles.settingsScroll} contentContainerStyle={styles.settingsPageContent} keyboardShouldPersistTaps="handled">
+              <Text style={styles.settingsSectionTitle}>Interface controls</Text>
+              <Text style={styles.settingsIntro}>Choose exactly what stays on screen. Hide Everything keeps a small Settings button available so you can restore your layout.</Text>
+              <View style={styles.backgroundActions}>
+                <Pressable onPress={() => setInterfacePreset(true)} style={styles.backgroundAction}><Text style={styles.backgroundActionText}>Show Everything</Text></Pressable>
+                <Pressable onPress={() => setInterfacePreset(false)} style={styles.backgroundAction}><Text style={styles.backgroundActionText}>Hide Everything</Text></Pressable>
+              </View>
+              <View style={styles.settingsCard}>
+                <SettingRow title="Browser header and logo" detail="Show or hide the Saturn branding at the top." value={settings.showHeader !== false} onValueChange={(value) => updateSetting('showHeader', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Top search bar" detail="Show or hide the search field above the page." value={settings.showSearchBar !== false} onValueChange={(value) => updateSetting('showSearchBar', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Navigation buttons" detail="Show or hide the back, forward, and home row." value={settings.showNavigationRow !== false} onValueChange={(value) => updateSetting('showNavigationRow', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Bottom dock" detail="Hide the dock; a small Settings button remains so you can restore it." value={settings.showDock !== false} onValueChange={(value) => updateSetting('showDock', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Welcome section" detail="Show or hide the home-page welcome heading." value={settings.showWelcome !== false} onValueChange={(value) => updateSetting('showWelcome', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Saved pages section" detail="Show or hide bookmarks on the start page." value={settings.showBookmarksSection !== false} onValueChange={(value) => updateSetting('showBookmarksSection', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Search provider footer" detail="Show or hide the search engine note at the bottom." value={settings.showSearchFooter !== false} onValueChange={(value) => updateSetting('showSearchFooter', value)} />
+              </View>
+
               <Text style={styles.settingsSectionTitle}>Home screen</Text>
               <Text style={styles.settingsIntro}>Choose what appears when Saturn opens.</Text>
               <View style={styles.settingsCard}>
@@ -1117,6 +1169,7 @@ const styles = StyleSheet.create({
   searchButton: { backgroundColor: '#e6ad60', borderRadius: 15, paddingHorizontal: 11, paddingVertical: 5, minWidth: 42, alignItems: 'center' },
   searchButtonText: { color: '#192235', fontWeight: '800', fontSize: 13 },
   navRow: { minHeight: 46, paddingHorizontal: 18, paddingVertical: 4, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  hiddenSettingsButton: { position: 'absolute', right: 12, bottom: 12, width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: '#172238', borderWidth: 1, borderColor: '#e6ad60' },
   bottomDock: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginHorizontal: 22, marginTop: 5, marginBottom: Platform.OS === 'ios' ? 8 : 10, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 23, backgroundColor: 'rgba(23, 34, 56, 0.97)', borderWidth: 1, borderColor: '#35435c', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
   bottomDockBrowsing: { marginHorizontal: 12, paddingHorizontal: 7, gap: 5 },
   safariAddressBar: { flex: 1, minWidth: 0, height: 42, flexDirection: 'row', alignItems: 'center', backgroundColor: '#0d1728', borderWidth: 1, borderColor: '#3b4961', borderRadius: 15, paddingLeft: 10, paddingRight: 4, gap: 5 },
