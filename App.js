@@ -38,6 +38,10 @@ const DEFAULT_SETTINGS = {
   blockAds: true,
   domStorageEnabled: true,
   showDailyVerse: true,
+  showPrivacySnapshot: true,
+  showBrandTagline: true,
+  compactHome: false,
+  showDockLabels: true,
   quickPaths: { DuckDuckGo: false, YouTube: false, Wikipedia: false, 'Bible Gateway': false },
   verseTranslation: 'web',
   bibleKey: '',
@@ -556,10 +560,10 @@ export default function App() {
   };
 
   const renderHome = () => (
-    <ScrollView style={styles.homeScroll} contentContainerStyle={styles.homeContent} keyboardShouldPersistTaps="handled">
+    <ScrollView style={styles.homeScroll} contentContainerStyle={[styles.homeContent, settings.compactHome && styles.homeContentCompact]] keyboardShouldPersistTaps="handled">
       <View style={styles.welcomeBlock}>
         <Text style={styles.eyebrow}>YOUR SPACE ON THE WEB</Text>
-        <Text style={styles.welcomeTitle}>A little light{ '\n' }for the way ahead.</Text>
+        <Text style={[styles.welcomeTitle, settings.compactHome && styles.welcomeTitleCompact]}>A little light{ '\n' }for the way ahead.</Text>
         <Text style={styles.welcomeBody}>Search, read, and explore at your own pace.</Text>
       </View>
 
@@ -608,7 +612,7 @@ export default function App() {
         </>
       )}
 
-      <View style={styles.privacySnapshot}>
+      {settings.showPrivacySnapshot !== false && <View style={styles.privacySnapshot}>
         <View style={styles.privacySnapshotIcon}><Text style={styles.privacySnapshotGlyph}>✦</Text></View>
         <View style={styles.privacySnapshotCopy}>
           <Text style={styles.privacySnapshotTitle}>Your privacy, at a glance</Text>
@@ -622,6 +626,8 @@ export default function App() {
         </Pressable>
       </View>
 
+      <View style={styles.sectionHeading}>
+        </View>}
       <View style={styles.sectionHeading}>
         <Text style={styles.sectionTitle}>Your bookmarks</Text>
         <View style={styles.homeBookmarkActions}>
@@ -663,7 +669,7 @@ export default function App() {
           <Image source={require('./assets/icon.png')} style={styles.brandIcon} />
           <View>
             <Text style={styles.brandName}>Lantern</Text>
-            <Text style={styles.brandTagline}>Browse with a little more calm</Text>
+            {settings.showBrandTagline !== false && <Text style={styles.brandTagline}>Browse with a little more calm</Text>}
           </View>
         </View>
       </View>
@@ -767,10 +773,10 @@ export default function App() {
           </Pressable>
         )}
         <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
-          <Text style={styles.dockGlyph}>▤</Text>{!url && <Text style={styles.dockLabel}>Saved</Text>}
+          <Text style={styles.dockGlyph}>▤</Text>{!url && settings.showDockLabels !== false && <Text style={styles.dockLabel}>Saved</Text>}
         </Pressable>
         <Pressable onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Settings">
-          <Text style={styles.dockGlyph}>⚙</Text>{!url && <Text style={styles.dockLabel}>Settings</Text>}
+          <Text style={styles.dockGlyph}>⚙</Text>{!url && settings.showDockLabels !== false && <Text style={styles.dockLabel}>Settings</Text>}
         </Pressable>
       </View>
 
@@ -891,6 +897,17 @@ export default function App() {
                 />
               </View>
 
+              <Text style={styles.settingsSectionTitle}>Appearance & layout</Text>
+              <Text style={styles.settingsIntro}>Tune the start page and bottom dock. Your choices are saved on this device.</Text>
+              <View style={styles.settingsCard}>
+                <SettingRow title="Compact start page" detail="Use a tighter home-screen layout with a smaller welcome heading." value={!!settings.compactHome} onValueChange={(value) => updateSetting('compactHome', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Show browser tagline" detail="Show or hide the text beneath the Lantern name." value={settings.showBrandTagline !== false} onValueChange={(value) => updateSetting('showBrandTagline', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Show privacy card" detail="Show or hide the privacy summary on the start page." value={settings.showPrivacySnapshot !== false} onValueChange={(value) => updateSetting('showPrivacySnapshot', value)} />
+                <View style={styles.settingDivider} />
+                <SettingRow title="Dock labels" detail="Show or hide Home, Saved, and Settings labels under dock icons." value={settings.showDockLabels !== false} onValueChange={(value) => updateSetting('showDockLabels', value)} />
+              </View>
               <Text style={styles.settingsSectionTitle}>Quick paths</Text>
               <Text style={styles.settingsIntro}>Turn each shortcut on or off. All are hidden by default.</Text>
               <View style={styles.settingsCard}>
@@ -1120,6 +1137,8 @@ const styles = StyleSheet.create({
   progress: { height: 3 },
   homeScroll: { flex: 1 },
   homeContent: { paddingHorizontal: 18, paddingBottom: 30 },
+  homeContentCompact: { paddingHorizontal: 13, paddingBottom: 18 },
+  welcomeTitleCompact: { fontSize: 25, lineHeight: 30 },
   welcomeBlock: { paddingTop: 14, paddingBottom: 16 },
   eyebrow: { color: '#e7b366', fontSize: 11, fontWeight: '800', letterSpacing: 1.6, marginBottom: 9 },
   welcomeTitle: { color: '#f7f4ee', fontSize: 31, fontWeight: '700', letterSpacing: -0.7, lineHeight: 37 },
