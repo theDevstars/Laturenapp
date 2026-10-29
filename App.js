@@ -772,6 +772,11 @@ export default function App() {
             <Text style={styles.dockGlyph}>⌕</Text><Text style={styles.dockLabel}>Search</Text>
           </Pressable>
         )}
+        {url && (
+          <Pressable onPress={() => openBookmarkEditor()} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Save current page">
+            <Text style={styles.dockGlyph}>＋</Text>
+          </Pressable>
+        )}
         <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
           <Text style={styles.dockGlyph}>▤</Text>{!url && settings.showDockLabels !== false && <Text style={styles.dockLabel}>Saved</Text>}
         </Pressable>
