@@ -626,8 +626,7 @@ export default function App() {
         </Pressable>
       </View>
 
-      <View style={styles.sectionHeading}>
-        </View>}
+      </View>}
       <View style={styles.sectionHeading}>
         <Text style={styles.sectionTitle}>Your bookmarks</Text>
         <View style={styles.homeBookmarkActions}>
