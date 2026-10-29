@@ -740,6 +740,21 @@ export default function App() {
         />
       ) : renderHome()}
 
+      <View style={styles.bottomDock} accessibilityLabel="Browser dock">
+        <Pressable onPress={goHome} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Home">
+          <Text style={styles.dockGlyph}>⌂</Text><Text style={styles.dockLabel}>Home</Text>
+        </Pressable>
+        <Pressable onPress={() => { if (url) openBookmarkEditor(); else setAddress(''); }} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Search">
+          <Text style={styles.dockGlyph}>⌕</Text><Text style={styles.dockLabel}>Search</Text>
+        </Pressable>
+        <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
+          <Text style={styles.dockGlyph}>▤</Text><Text style={styles.dockLabel}>Saved</Text>
+        </Pressable>
+        <Pressable onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Settings">
+          <Text style={styles.dockGlyph}>⚙</Text><Text style={styles.dockLabel}>Settings</Text>
+        </Pressable>
+      </View>
+
       <Modal visible={bookmarksVisible} animationType="slide" transparent onRequestClose={() => setBookmarksVisible(false)}>
         <View style={styles.modalBackdrop}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setBookmarksVisible(false)} accessibilityLabel="Close saved pages" />
@@ -1059,11 +1074,15 @@ const styles = StyleSheet.create({
   headerAction: { alignItems: 'center', justifyContent: 'center', minWidth: 48, paddingHorizontal: 5, paddingVertical: 4 },
   headerActionGlyph: { color: '#e6b366', fontSize: 19, height: 22 },
   headerActionText: { color: '#bac4d5', fontSize: 11, fontWeight: '600' },
-  searchRow: { flexDirection: 'row', marginHorizontal: 24, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, borderRadius: 13, padding: 3, gap: 4, alignItems: 'center' },
-  addressInput: { flex: 1, minWidth: 0, paddingHorizontal: 10, paddingVertical: 7, color: '#f3f5f8', fontSize: 14 },
-  searchButton: { backgroundColor: '#e6ad60', borderRadius: 10, paddingHorizontal: 13, paddingVertical: 8, minWidth: 52, alignItems: 'center' },
+  searchRow: { flexDirection: 'row', marginHorizontal: 38, backgroundColor: '#172238', borderColor: '#293752', borderWidth: 1, borderRadius: 18, padding: 2, gap: 3, alignItems: 'center', minHeight: 38, maxHeight: 40 },
+  addressInput: { flex: 1, minWidth: 0, paddingHorizontal: 9, paddingVertical: 4, color: '#f3f5f8', fontSize: 13 },
+  searchButton: { backgroundColor: '#e6ad60', borderRadius: 15, paddingHorizontal: 11, paddingVertical: 5, minWidth: 42, alignItems: 'center' },
   searchButtonText: { color: '#192235', fontWeight: '800', fontSize: 13 },
-  navRow: { minHeight: 50, paddingHorizontal: 18, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  navRow: { minHeight: 46, paddingHorizontal: 18, paddingVertical: 4, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  bottomDock: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginHorizontal: 22, marginTop: 5, marginBottom: Platform.OS === 'ios' ? 8 : 10, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 23, backgroundColor: 'rgba(23, 34, 56, 0.97)', borderWidth: 1, borderColor: '#35435c', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
+  dockItem: { minWidth: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, paddingVertical: 3, gap: 2 },
+  dockGlyph: { color: '#e6b366', fontSize: 20, lineHeight: 23 },
+  dockLabel: { color: '#bac4d5', fontSize: 10, fontWeight: '700' },
   iconButton: { width: 42, height: 42, borderRadius: 14, backgroundColor: '#e4ac5e', alignItems: 'center', justifyContent: 'center' },
   iconButtonSecondary: { backgroundColor: '#172238', borderWidth: 1, borderColor: '#293752' },
   iconGlyph: { color: '#172238', fontSize: 25, lineHeight: 29, fontWeight: '500' },
