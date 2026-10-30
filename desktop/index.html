@@ -56,7 +56,7 @@ dialog{background:#fff;color:#252721;border-color:#e4e5de;box-shadow:0 24px 80px
 <div class="sectionhead"><strong>Your bookmarks</strong><div class="actions"><button id="addHomeBookmark" class="small">＋ Add</button><button id="manageHomeBookmarks" class="small">Manage</button></div></div>
 <div id="homeBookmarks" class="grid"></div>
 </main>
-<webview id="browser" partition="persist:lantern" webpreferences="contextIsolation=yes,nodeIntegration=no,sandbox=yes"></webview>
+<webview id="browser" partition="persist:saturn" webpreferences="contextIsolation=yes,nodeIntegration=no,sandbox=yes"></webview>
 <dialog id="settings"><div class="dialogbody"><div class="dialogtop"><div><h2>Settings &amp; safety</h2><div class="muted">Your browser, your comfort.</div></div><button data-close="settings">✕</button></div>
 <div class="field"><label for="engine">Search provider</label><select id="engine"><option>DuckDuckGo</option><option>Google</option><option>Bing</option></select></div>
 <div class="field"><label>Home background</label><div class="actions"><button id="chooseBackground">Choose photo</button><button id="clearBackground">Reset</button><input id="backgroundFile" type="file" accept="image/*" hidden></div><div class="muted">Pick a photo for your Saturn home screen.</div></div>
@@ -64,7 +64,7 @@ dialog{background:#fff;color:#252721;border-color:#e4e5de;box-shadow:0 24px 80px
 <div class="row"><div class="rowcopy"><div class="rowtitle">Prefer secure connections</div><div class="rowdesc">Use HTTPS for typed site names.</div></div><input class="switch" id="https" type="checkbox"></div>
 <div class="row"><div class="rowcopy"><div class="rowtitle">JavaScript</div><div class="rowdesc">Some websites need this enabled.</div></div><input class="switch" id="js" type="checkbox"></div>
 <div class="row"><div class="rowcopy"><div class="rowtitle">Allow pop-up windows</div><div class="rowdesc">Pop-ups are blocked unless you turn this on.</div></div><input class="switch" id="popups" type="checkbox"></div>
-<p class="muted">Search goes to your selected provider. Web pages cannot access local files through Lantern.</p>
+<p class="muted">Search goes to your selected provider. Web pages cannot access local files through Saturn.</p>
 <div class="dialogfoot"><button data-close="settings">Done</button></div></div></dialog>
 <dialog id="saved"><div class="dialogbody"><div class="dialogtop"><div><h2>Saved pages</h2><div class="muted">Add, open, or edit your shortcuts.</div></div><button data-close="saved">✕</button></div><div id="bookmarkList"></div><div class="dialogfoot"><button id="addBookmark" class="primary">＋ Save current page</button><button data-close="saved">Done</button></div></div></dialog>
 <dialog id="editor"><div class="dialogbody"><div class="dialogtop"><h2 id="editorTitle">Save page</h2><button data-close="editor">✕</button></div><div class="field"><label for="bmName">Name</label><input id="bmName" maxlength="80"></div><div class="field"><label for="bmUrl">Web address</label><input id="bmUrl" placeholder="https://example.com"></div><div class="dialogfoot"><button id="removeBookmark">Remove</button><button data-close="editor">Cancel</button><button class="primary" id="saveBookmark">Save</button></div></div></dialog>
@@ -88,8 +88,8 @@ const verses=[
 const defaults={engine:'DuckDuckGo',showVerse:true,verseTranslation:'KJV',https:true,js:true,popups:false};
 let settings={...defaults,...read('settings',{})}, bookmarks=read('bookmarks',[]), editing=null, currentUrl='';
 const translationCodes={KJV:'KJV',NIV:'NIV',NASB:'NASB1995'};
-function read(k,d){try{return JSON.parse(localStorage.getItem('lantern-'+k))??d}catch{return d}}
-function persist(k,v){localStorage.setItem('lantern-'+k,JSON.stringify(v))}
+function read(k,d){try{return JSON.parse(localStorage.getItem('saturn-'+k))??d}catch{return d}}
+function persist(k,v){localStorage.setItem('saturn-'+k,JSON.stringify(v))}
 function renderVerse(){const n=new Date(),d=Math.floor((Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())-Date.UTC(n.getFullYear(),0,1))/86400000),v=verses[d%verses.length];$('#verseRef').textContent=v[0].toUpperCase()+' · WEB';$('#verseText').textContent=v[1];$('#verseTranslation').value=settings.verseTranslation||'KJV';$('#verseLink').dataset.url='https://www.biblegateway.com/passage/?search='+encodeURIComponent(v[0])+'&version='+translationCodes[settings.verseTranslation||'KJV'];$('#verse').hidden=!settings.showVerse}
 function renderSettings(){ $('#engine').value=settings.engine;$('#showVerse').checked=settings.showVerse;$('#https').checked=settings.https;$('#js').checked=settings.js;$('#popups').checked=settings.popups;renderVerse()}
 function setSetting(k,v){settings[k]=v;persist('settings',settings);renderSettings();if(k==='js'||k==='popups')applyBrowserSettings();if(k==='backgroundData')applyBackground()}
