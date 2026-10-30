@@ -672,7 +672,7 @@ export default function App() {
       {settings.showWelcome !== false && <View style={styles.welcomeBlock}>
         <Text style={styles.eyebrow}>YOUR SPACE ON THE WEB</Text>
         <Text style={[styles.welcomeTitle, settings.compactHome && styles.welcomeTitleCompact]}>A little light{ '\n' }for the way ahead.</Text>
-        <Text style={styles.welcomeBody}>Search, read, and explore at your own pace.</Text>
+        <Text style={[styles.welcomeBody, { color: palette.muted }]}>Search, read, and explore at your own pace.</Text>
       </View>}
 
       {settings.showDailyVerse && (
@@ -684,7 +684,7 @@ export default function App() {
             </View>
             <Text style={styles.verseReference}>{dailyVerse.reference.toUpperCase()} · {verseVersion}</Text>
           </View>
-          <Text style={styles.verseText}>{verseText}</Text>
+          <Text style={[styles.verseText, { color: isLight ? '#263248' : '#f4f0e7' }]}>{verseText}</Text>
           {verseNote ? <Text style={styles.verseNote}>{verseNote}</Text> : null}
           <Pressable
             onPress={() => navigate('https://www.biblegateway.com/passage/?search=' + encodeURIComponent(dailyVerse.reference) + (linkVersion ? '&version=' + linkVersion : ''))}
@@ -700,8 +700,8 @@ export default function App() {
       {QUICK_LINKS.some((item) => settings.quickPaths && settings.quickPaths[item.title]) && (
         <>
           <View style={styles.sectionHeading}>
-            <Text style={styles.sectionTitle}>Quick paths</Text>
-            <Text style={styles.sectionHint}>A few good places to begin</Text>
+            <Text style={[styles.sectionTitle, { color: palette.text }]}>Quick paths</Text>
+            <Text style={[styles.sectionHint, { color: palette.muted }]}>A few good places to begin</Text>
           </View>
           <View style={styles.quickGrid}>
             {QUICK_LINKS.filter((item) => settings.quickPaths && settings.quickPaths[item.title]).map((item) => (
@@ -734,7 +734,7 @@ export default function App() {
         </Pressable>
       </View>}
       {settings.showBookmarksSection !== false && <><View style={styles.sectionHeading}>
-        <Text style={styles.sectionTitle}>Your bookmarks</Text>
+        <Text style={[styles.sectionTitle, { color: palette.text }]}>Your bookmarks</Text>
         <View style={styles.homeBookmarkActions}>
           <Pressable onPress={() => openBookmarkEditor()}><Text style={styles.seeAll}>＋ Add</Text></Pressable>
           <Pressable onPress={() => setBookmarksVisible(true)}><Text style={styles.seeAll}>Manage</Text></Pressable>
@@ -746,11 +746,11 @@ export default function App() {
         </Pressable>
       )}
       {bookmarks.map((item) => (
-        <Pressable key={item.id} onPress={() => openSavedPage(item)} style={[styles.savedHomeRow, { backgroundColor: palette.surfaceAlt }]}>
+        <Pressable key={item.id} onPress={() => openSavedPage(item)} style={[styles.savedHomeRow, { backgroundColor: palette.surfaceAlt, borderColor: palette.border, borderWidth: 1 }]}>
           <Text style={styles.savedHomeMark}>↗</Text>
           <View style={styles.savedHomeCopy}>
-            <Text numberOfLines={1} style={styles.savedHomeTitle}>{item.name}</Text>
-            <Text numberOfLines={1} style={styles.savedHomeUrl}>{item.url.replace(/^https?:\/\//, '')}</Text>
+            <Text numberOfLines={1} style={[styles.savedHomeTitle, { color: palette.text }]}>{item.name}</Text>
+            <Text numberOfLines={1} style={[styles.savedHomeUrl, { color: palette.muted }]}>{item.url.replace(/^https?:\/\//, '')}</Text>
           </View>
           <Text style={styles.quickArrow}>›</Text>
         </Pressable>
@@ -774,8 +774,8 @@ export default function App() {
         <View style={styles.brand}>
           <Image source={require('./assets/icon.png')} style={styles.brandIcon} />
           <View>
-            <Text style={styles.brandName}>Saturn</Text>
-            {settings.showBrandTagline !== false && <Text style={styles.brandTagline}>Browse with a little more calm</Text>}
+            <Text style={[styles.brandName, { color: palette.text }]}>Saturn</Text>
+            {settings.showBrandTagline !== false && <Text style={[styles.brandTagline, { color: palette.muted }]}>Browse with a little more calm</Text>}
           </View>
         </View>
       </View>
@@ -898,8 +898,8 @@ export default function App() {
             <View style={styles.sheetHandle} />
             <View style={styles.sheetHeader}>
               <View>
-                <Text style={styles.sheetTitle}>Saved pages</Text>
-                <Text style={styles.sheetSubtitle}>Keep your favorite places close.</Text>
+                <Text style={[styles.sheetTitle, { color: palette.text }]}>Saved pages</Text>
+                <Text style={[styles.sheetSubtitle, { color: palette.muted }]}>Keep your favorite places close.</Text>
               </View>
               <IconButton label="Close saved pages" glyph="×" onPress={() => setBookmarksVisible(false)} secondary />
             </View>
@@ -919,8 +919,8 @@ export default function App() {
                   <Pressable onPress={() => openSavedPage(item)} style={styles.bookmarkMain}>
                     <Text style={styles.bookmarkMark}>↗</Text>
                     <View style={styles.bookmarkCopy}>
-                      <Text numberOfLines={1} style={styles.bookmarkTitle}>{item.name}</Text>
-                      <Text numberOfLines={1} style={styles.bookmarkUrl}>{item.url.replace(/^https?:\/\//, '')}</Text>
+                      <Text numberOfLines={1} style={[styles.bookmarkTitle, { color: palette.text }]}>{item.name}</Text>
+                      <Text numberOfLines={1} style={[styles.bookmarkUrl, { color: palette.muted }]}>{item.url.replace(/^https?:\/\//, '')}</Text>
                     </View>
                   </Pressable>
                   <View style={styles.bookmarkOrderActions}>
@@ -950,8 +950,8 @@ export default function App() {
               <View style={styles.sheetHandle} />
               <View style={styles.sheetHeader}>
                 <View>
-                  <Text style={styles.sheetTitle}>{editingId ? 'Edit saved page' : 'Add saved page'}</Text>
-                  <Text style={styles.sheetSubtitle}>Give this place a name you’ll remember.</Text>
+                  <Text style={[styles.sheetTitle, { color: palette.text }]}>{editingId ? 'Edit saved page' : 'Add saved page'}</Text>
+                  <Text style={[styles.sheetSubtitle, { color: palette.muted }]}>Give this place a name you’ll remember.</Text>
                 </View>
                 <IconButton label="Close editor" glyph="×" onPress={() => setEditorVisible(false)} secondary />
               </View>
@@ -1017,8 +1017,8 @@ export default function App() {
             ) : (
               <>
                 {settingsCategory === 'Customization' && (<>
-              <Text style={styles.settingsSectionTitle}>Color theme</Text>
-              <Text style={styles.settingsIntro}>Choose separate colors for Saturn’s dark and light appearance.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Color theme</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose separate colors for Saturn’s dark and light appearance.</Text>
               <View style={styles.themeChoices}>
                 <Pressable onPress={() => updateSetting('theme', 'dark')} style={[styles.themeChoice, { backgroundColor: settings.theme !== 'light' ? '#172238' : palette.surface, borderColor: settings.theme !== 'light' ? '#e8b76d' : palette.border }]}>
                   <Text style={[styles.themeChoiceGlyph, { color: '#e8b76d' }]}>☾</Text><Text style={[styles.themeChoiceText, { color: settings.theme !== 'light' ? '#ffffff' : palette.text }]}>Dark</Text>
@@ -1029,8 +1029,8 @@ export default function App() {
                   {settings.theme === 'light' && <Text style={[styles.themeChoiceCheck, { color: '#4169d8' }]}>✓</Text>}
                 </Pressable>
               </View>
-              <Text style={styles.settingsSectionTitle}>Interface controls</Text>
-              <Text style={styles.settingsIntro}>Choose exactly what stays on screen. Hide Everything keeps a small Settings button available so you can restore your layout.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Interface controls</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose exactly what stays on screen. Hide Everything keeps a small Settings button available so you can restore your layout.</Text>
               <View style={styles.backgroundActions}>
                 <Pressable onPress={() => setInterfacePreset(true)} style={styles.backgroundAction}><Text style={styles.backgroundActionText}>Show Everything</Text></Pressable>
                 <Pressable onPress={() => setInterfacePreset(false)} style={styles.backgroundAction}><Text style={styles.backgroundActionText}>Hide Everything</Text></Pressable>
@@ -1051,8 +1051,8 @@ export default function App() {
                 <SettingRow title="Search provider footer" detail="Show or hide the search engine note at the bottom." value={settings.showSearchFooter !== false} light={isLight} onValueChange={(value) => updateSetting('showSearchFooter', value)} />
               </View>
 
-              <Text style={styles.settingsSectionTitle}>Home screen</Text>
-              <Text style={styles.settingsIntro}>Choose what appears when Saturn opens.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Home screen</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose what appears when Saturn opens.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <SettingRow
                   title="Daily Bible verse"
@@ -1062,8 +1062,8 @@ export default function App() {
                 />
               </View>
 
-              <Text style={styles.settingsSectionTitle}>Appearance & layout</Text>
-              <Text style={styles.settingsIntro}>Tune the start page and bottom dock. Your choices are saved on this device.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Appearance & layout</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Tune the start page and bottom dock. Your choices are saved on this device.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <SettingRow title="Compact start page" detail="Use a tighter home-screen layout with a smaller welcome heading." value={!!settings.compactHome} light={isLight} onValueChange={(value) => updateSetting('compactHome', value)} />
                 <View style={styles.settingDivider} />
@@ -1073,8 +1073,8 @@ export default function App() {
                 <View style={styles.settingDivider} />
                 <SettingRow title="Dock labels" detail="Show or hide Home, Saved, and Settings labels under dock icons." value={settings.showDockLabels !== false} light={isLight} onValueChange={(value) => updateSetting('showDockLabels', value)} />
               </View>
-              <Text style={styles.settingsSectionTitle}>Quick paths</Text>
-              <Text style={styles.settingsIntro}>Turn each shortcut on or off. All are hidden by default.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Quick paths</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Turn each shortcut on or off. All are hidden by default.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 {QUICK_LINKS.map((item, index) => (
                   <React.Fragment key={item.title}>
@@ -1089,8 +1089,8 @@ export default function App() {
                 ))}
               </View>
 
-              <Text style={styles.settingsSectionTitle}>Home background</Text>
-              <Text style={styles.settingsIntro}>Choose a photo from your library for Saturn’s home screen.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Home background</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose a photo from your library for Saturn’s home screen.</Text>
               <View style={styles.backgroundActions}>
                 <Pressable onPress={chooseBackground} style={({ pressed }) => [styles.backgroundAction, pressed && styles.pressed]}>
                   <Text style={styles.backgroundActionText}>Choose photo</Text>
@@ -1100,8 +1100,8 @@ export default function App() {
                 </Pressable>
               </View>
 
-              <Text style={styles.settingsSectionTitle}>Bible translation</Text>
-              <Text style={styles.settingsIntro}>The verse on your Saturn home screen changes to the translation you pick. These are public-domain texts that load from bible-api.com. KJV and WEB also work offline.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Bible translation</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>The verse on your Saturn home screen changes to the translation you pick. These are public-domain texts that load from bible-api.com. KJV and WEB also work offline.</Text>
               <View style={styles.transWrap}>
                 {[...TRANSLATIONS, ...apiBibles].map((item) => (
                   <Pressable
@@ -1113,7 +1113,7 @@ export default function App() {
                   </Pressable>
                 ))}
               </View>
-              <Text style={styles.settingsIntro}>Licensed versions such as NIV, NASB and ESV can’t be bundled in an app. If you have a free API.Bible key, paste it here to load the versions your key is licensed for.</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Licensed versions such as NIV, NASB and ESV can’t be bundled in an app. If you have a free API.Bible key, paste it here to load the versions your key is licensed for.</Text>
               <TextInput
                 value={settings.bibleKey}
                 onChangeText={(value) => updateSetting('bibleKey', value.trim())}
@@ -1134,8 +1134,8 @@ export default function App() {
 
                 </>)}
                 {settingsCategory === 'Search' && <>
-              <Text style={styles.settingsSectionTitle}>Search</Text>
-              <Text style={styles.settingsIntro}>Choose where Lantern sends search terms. Bang shortcuts like !w and !yt use DuckDuckGo.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Search</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose where Lantern sends search terms. Bang shortcuts like !w and !yt use DuckDuckGo.</Text>
               <View style={styles.engineOptions}>
                 {Object.keys(SEARCH_ENGINES).map((engine) => (
                   <Pressable
@@ -1151,8 +1151,8 @@ export default function App() {
 
                 </>}
                 {settingsCategory === 'Passwords' && <>
-              <Text style={styles.settingsSectionTitle}>Passwords</Text>
-              <Text style={styles.settingsIntro}>Choose a password manager, then open it. Saturn does not store your vault or provide native iPhone AutoFill.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Passwords</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose a password manager, then open it. Saturn does not store your vault or provide native iPhone AutoFill.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <Pressable
                   accessibilityRole="button"
@@ -1187,8 +1187,8 @@ export default function App() {
 
                 </>}
                 {settingsCategory === 'Extensions & tools' && <>
-              <Text style={styles.settingsSectionTitle}>Extensions & tools</Text>
-              <Text style={styles.settingsIntro}>Choose a web tool or extension directory. iOS WebView does not install desktop browser extensions, so these open as websites instead.</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Extensions & tools</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose a web tool or extension directory. iOS WebView does not install desktop browser extensions, so these open as websites instead.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <Pressable
                   accessibilityRole="button"
@@ -1223,7 +1223,7 @@ export default function App() {
 
                 </>}
                 {settingsCategory === 'Security & privacy' && <>
-              <Text style={styles.settingsSectionTitle}>Security</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Security</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <SettingRow title="Enhanced ad & tracker blocking" detail="Uses an expanded list of ad and tracking domains, hides common ad containers, and blocks many script-based tracking requests. Some ads may still appear because iOS WebView does not expose every network request." value={settings.blockAds} light={isLight} onValueChange={(value) => updateSetting('blockAds', value)} />
                 <View style={styles.settingDivider} />
@@ -1254,8 +1254,8 @@ export default function App() {
 
                 </>}
                 {settingsCategory === 'Browsing data' && <>
-              <Text style={styles.settingsSectionTitle}>Browsing data</Text>
-              <Text style={styles.settingsIntro}>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Browsing data</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>
                 {Platform.OS === 'android'
                   ? 'Clear cached site files and the current browser history. Saved pages are kept.'
                   : 'Close the current page and clear its history. Saved pages are kept.'}
