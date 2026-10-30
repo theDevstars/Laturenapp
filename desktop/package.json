@@ -13,7 +13,7 @@
     "electron-builder": "^26.0.12"
   },
   "build": {
-    "appId": "com.lantern.browser",
+    "appId": "com.saturn.browser",
     "productName": "Saturn",
     "directories": {
       "output": "dist"
