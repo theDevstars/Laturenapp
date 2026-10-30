@@ -177,7 +177,8 @@ jobs:
             - Android APK: intended for Android devices.
             - Windows EXE installer: Saturn desktop browser with the DuckDuckGo home screen and daily verse settings.
             - iOS IPA: unsigned build; standard iPhone installation requires Apple code signing.
-          prerelease: true
+          prerelease: false
+          make_latest: true
           files: release-files/*
       - name: Update SideStore source
         env:
