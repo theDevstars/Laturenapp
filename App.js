@@ -54,7 +54,7 @@ const DEFAULT_SETTINGS = {
   verseTranslation: 'web',
   bibleKey: '',
   passwordManager: 'Bitwarden',
-  extensionShortcut: 'Chrome Web Store',
+  extensionShortcut: 'Google Translate',
 };
 const PASSWORD_MANAGERS = {
   'Bitwarden': 'https://vault.bitwarden.com',
@@ -63,7 +63,6 @@ const PASSWORD_MANAGERS = {
   'KeePassXC': 'https://keepassxc.org',
 };
 const EXTENSION_TOOLS = {
-  'Chrome Web Store': 'https://chromewebstore.google.com/',
   'Bitwarden': 'https://vault.bitwarden.com/',
   'Google Translate': 'https://translate.google.com/',
   'Grammarly': 'https://www.grammarly.com/',
@@ -884,10 +883,10 @@ export default function App() {
           </Pressable>
         )}
         <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, styles.dockIconTile, { backgroundColor: isLight ? '#e5ebff' : '#26354d' }, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
-          <Text style={[styles.dockGlyph, { color: palette.accent }]}>▣</Text>{!url && settings.showDockLabels !== false && <Text style={[styles.dockLabel, { color: palette.muted }]}>Saved</Text>}
+          <Text style={[styles.dockGlyph, { color: isLight ? '#4169d8' : '#b9c9ff', fontSize: 21, fontWeight: '800' }]}>▤</Text>{!url && settings.showDockLabels !== false && <Text style={[styles.dockLabel, { color: palette.muted }]}>Saved</Text>}
         </Pressable>
         <Pressable onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.dockItem, styles.dockIconTile, { backgroundColor: isLight ? '#e5ebff' : '#26354d' }, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Settings">
-          <Text style={[styles.dockGlyph, styles.settingsDockGlyph, { color: palette.accent }]}>⚙︎</Text>{!url && settings.showDockLabels !== false && <Text style={[styles.dockLabel, { color: palette.muted }]}>Settings</Text>}
+          <Text style={[styles.dockGlyph, styles.settingsDockGlyph, { color: isLight ? '#328052' : '#9bd5b2', fontSize: 22 }]}>⚙</Text>{!url && settings.showDockLabels !== false && <Text style={[styles.dockLabel, { color: palette.muted }]}>Settings</Text>}
         </Pressable>
       </View> : <Pressable onPress={() => setSettingsVisible(true)} style={styles.hiddenSettingsButton} accessibilityRole="button" accessibilityLabel="Open Settings"><Text style={styles.dockGlyph}>⚙</Text></Pressable>}
 
@@ -1002,7 +1001,6 @@ export default function App() {
                 {[
                   { title: 'Customization', detail: 'Themes, home screen, dock, layout and Bible display', icon: '✦' },
                   { title: 'Search', detail: 'Choose your search engine and search behavior', icon: '⌕' },
-                  { title: 'Passwords', detail: 'Choose and open your password manager', icon: '▣' },
                   { title: 'Extensions & tools', detail: 'Choose web tools and extension directories', icon: '⌘' },
                   { title: 'Security & privacy', detail: 'Tracking protection, cookies and secure browsing', icon: '◈' },
                   { title: 'Browsing data', detail: 'Clear browser history and cached data', icon: '⌫' },
@@ -1067,7 +1065,7 @@ export default function App() {
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <SettingRow title="Compact start page" detail="Use a tighter home-screen layout with a smaller welcome heading." value={!!settings.compactHome} light={isLight} onValueChange={(value) => updateSetting('compactHome', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Show browser tagline" detail="Show or hide the text beneath the Lantern name." value={settings.showBrandTagline !== false} light={isLight} onValueChange={(value) => updateSetting('showBrandTagline', value)} />
+                <SettingRow title="Show browser tagline" detail="Show or hide the text beneath the Saturn name." value={settings.showBrandTagline !== false} light={isLight} onValueChange={(value) => updateSetting('showBrandTagline', value)} />
                 <View style={styles.settingDivider} />
                 <SettingRow title="Show privacy card" detail="Show or hide the privacy summary on the start page." value={settings.showPrivacySnapshot !== false} light={isLight} onValueChange={(value) => updateSetting('showPrivacySnapshot', value)} />
                 <View style={styles.settingDivider} />
@@ -1081,7 +1079,7 @@ export default function App() {
                     {index > 0 && <View style={styles.settingDivider} />}
                     <SettingRow
                       title={item.title}
-                      detail={'Show ' + item.title + ' on the Lantern home screen.'}
+                      detail={'Show ' + item.title + ' on the Saturn home screen.'}
                       value={!!(settings.quickPaths && settings.quickPaths[item.title])}
                       light={isLight} onValueChange={(value) => updateSetting('quickPaths', { ...(settings.quickPaths || DEFAULT_SETTINGS.quickPaths), [item.title]: value })}
                     />
@@ -1135,7 +1133,7 @@ export default function App() {
                 </>)}
                 {settingsCategory === 'Search' && <>
               <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Search</Text>
-              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose where Lantern sends search terms. Bang shortcuts like !w and !yt use DuckDuckGo.</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose where Saturn sends search terms. Bang shortcuts like !w and !yt use DuckDuckGo.</Text>
               <View style={styles.engineOptions}>
                 {Object.keys(SEARCH_ENGINES).map((engine) => (
                   <Pressable
@@ -1150,9 +1148,45 @@ export default function App() {
               </View>
 
                 </>}
-                {settingsCategory === 'Passwords' && <>
+                {settingsCategory === 'Extensions & tools' && <>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Extensions & tools</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Chrome Web Store extensions cannot be installed on iPhone. These are compatible web tools that open as websites, not installable browser extensions.</Text>
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Choose extension or web tool"
+                  onPress={() => setExtensionMenuOpen((open) => !open)}
+                  style={({ pressed }) => [styles.selectMenuButton, pressed && styles.pressed]}
+                >
+                  <View style={styles.settingCopy}>
+                    <Text style={styles.settingTitle}>{settings.extensionShortcut || 'Google Translate'}</Text>
+                    <Text style={styles.settingDetail}>Select a tool to open</Text>
+                  </View>
+                  <Text style={styles.selectMenuChevron}>{extensionMenuOpen ? '⌃' : '⌄'}</Text>
+                </Pressable>
+                {extensionMenuOpen && Object.keys(EXTENSION_TOOLS).map((tool) => (
+                  <Pressable
+                    key={tool}
+                    onPress={() => { updateSetting('extensionShortcut', tool); setExtensionMenuOpen(false); }}
+                    style={({ pressed }) => [styles.selectMenuOption, settings.extensionShortcut === tool && styles.selectMenuOptionSelected, pressed && styles.pressed]}
+                  >
+                    <Text style={[styles.settingTitle, settings.extensionShortcut === tool && styles.selectMenuOptionTextSelected]}>{tool}</Text>
+                    {settings.extensionShortcut === tool && <Text style={styles.engineCheck}>✓</Text>}
+                  </Pressable>
+                ))}
+                <View style={styles.settingDivider} />
+                <Pressable
+                  onPress={() => Linking.openURL(EXTENSION_TOOLS[settings.extensionShortcut] || EXTENSION_TOOLS['Google Translate']).catch(() => Alert.alert('Could not open tool', 'Check your connection and try again.'))}
+                  style={({ pressed }) => [styles.settingsActionButton, pressed && styles.pressed]}
+                >
+                  <Text style={styles.settingsActionButtonText}>Open {settings.extensionShortcut || 'Chrome Web Store'} ↗</Text>
+                </Pressable>
+              </View>
+
+                </>}
+                {settingsCategory === 'Security & privacy' && <>
               <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Passwords</Text>
-              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose a password manager, then open it. Saturn does not store your vault or provide native iPhone AutoFill.</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose a password manager and open its secure website. Saturn never stores your vault passwords.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <Pressable
                   accessibilityRole="button"
@@ -1186,44 +1220,9 @@ export default function App() {
               </View>
 
                 </>}
-                {settingsCategory === 'Extensions & tools' && <>
-              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Extensions & tools</Text>
-              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose a web tool or extension directory. iOS WebView does not install desktop browser extensions, so these open as websites instead.</Text>
-              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Choose extension or web tool"
-                  onPress={() => setExtensionMenuOpen((open) => !open)}
-                  style={({ pressed }) => [styles.selectMenuButton, pressed && styles.pressed]}
-                >
-                  <View style={styles.settingCopy}>
-                    <Text style={styles.settingTitle}>{settings.extensionShortcut || 'Chrome Web Store'}</Text>
-                    <Text style={styles.settingDetail}>Select a tool to open</Text>
-                  </View>
-                  <Text style={styles.selectMenuChevron}>{extensionMenuOpen ? '⌃' : '⌄'}</Text>
-                </Pressable>
-                {extensionMenuOpen && Object.keys(EXTENSION_TOOLS).map((tool) => (
-                  <Pressable
-                    key={tool}
-                    onPress={() => { updateSetting('extensionShortcut', tool); setExtensionMenuOpen(false); }}
-                    style={({ pressed }) => [styles.selectMenuOption, settings.extensionShortcut === tool && styles.selectMenuOptionSelected, pressed && styles.pressed]}
-                  >
-                    <Text style={[styles.settingTitle, settings.extensionShortcut === tool && styles.selectMenuOptionTextSelected]}>{tool}</Text>
-                    {settings.extensionShortcut === tool && <Text style={styles.engineCheck}>✓</Text>}
-                  </Pressable>
-                ))}
-                <View style={styles.settingDivider} />
-                <Pressable
-                  onPress={() => Linking.openURL(EXTENSION_TOOLS[settings.extensionShortcut] || EXTENSION_TOOLS['Chrome Web Store']).catch(() => Alert.alert('Could not open tool', 'Check your connection and try again.'))}
-                  style={({ pressed }) => [styles.settingsActionButton, pressed && styles.pressed]}
-                >
-                  <Text style={styles.settingsActionButtonText}>Open {settings.extensionShortcut || 'Chrome Web Store'} ↗</Text>
-                </Pressable>
-              </View>
-
-                </>}
                 {settingsCategory === 'Security & privacy' && <>
-              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Security</Text>
+              <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Security &amp; privacy</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Password managers and browser protections are kept together here. Saturn does not save or read your password vault.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <SettingRow title="Enhanced ad & tracker blocking" detail="Uses an expanded list of ad and tracking domains, hides common ad containers, and blocks many script-based tracking requests. Some ads may still appear because iOS WebView does not expose every network request." value={settings.blockAds} light={isLight} onValueChange={(value) => updateSetting('blockAds', value)} />
                 <View style={styles.settingDivider} />
@@ -1282,7 +1281,7 @@ const styles = StyleSheet.create({
   themeChoiceGlyph: { fontSize: 23, fontWeight: '700' },
   themeChoiceText: { fontSize: 14, fontWeight: '800' },
   themeChoiceCheck: { marginLeft: 'auto', color: '#e8b76d', fontWeight: '900', fontSize: 16 },
-  dockIconTile: { minWidth: 43, minHeight: 43, borderRadius: 14, paddingHorizontal: 6, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(128,145,180,0.22)' },
+  dockIconTile: { minWidth: 46, minHeight: 46, borderRadius: 16, paddingHorizontal: 7, paddingVertical: 5, borderWidth: 1, shadowOffset: { width: 0, height: 2 }, shadowRadius: 7, elevation: 2 },
 
   settingsDockGlyph: { fontSize: 21, lineHeight: 24 },
 
