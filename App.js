@@ -991,7 +991,7 @@ export default function App() {
               <Text style={styles.settingsBackGlyph}>‹</Text>
             </Pressable>
             <View style={styles.settingsPageHeading}>
-              <Text style={styles.settingsPageTitle}>{settingsCategory || 'Settings'}</Text>
+              <Text style={[styles.settingsPageTitle, { color: palette.text }]}>{settingsCategory || 'Settings'}</Text>
               <Text style={[styles.settingsPageSubtitle, { color: palette.muted }]}>{settingsCategory ? 'Customize this part of Saturn' : 'Make Saturn work your way'}</Text>
             </View>
             <Image source={require('./assets/icon.png')} style={styles.settingsPageIcon} />
@@ -1035,47 +1035,47 @@ export default function App() {
                 <Pressable onPress={() => setInterfacePreset(true)} style={styles.backgroundAction}><Text style={styles.backgroundActionText}>Show Everything</Text></Pressable>
                 <Pressable onPress={() => setInterfacePreset(false)} style={styles.backgroundAction}><Text style={styles.backgroundActionText}>Hide Everything</Text></Pressable>
               </View>
-              <View style={styles.settingsCard}>
-                <SettingRow title="Browser header and logo" detail="Show or hide the Saturn branding at the top." value={settings.showHeader !== false} onValueChange={(value) => updateSetting('showHeader', value)} />
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+                <SettingRow title="Browser header and logo" detail="Show or hide the Saturn branding at the top." value={settings.showHeader !== false} light={isLight} onValueChange={(value) => updateSetting('showHeader', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Top search bar" detail="Show or hide the search field above the page." value={settings.showSearchBar !== false} onValueChange={(value) => updateSetting('showSearchBar', value)} />
+                <SettingRow title="Top search bar" detail="Show or hide the search field above the page." value={settings.showSearchBar !== false} light={isLight} onValueChange={(value) => updateSetting('showSearchBar', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Navigation buttons" detail="Show or hide the back, forward, and home row." value={settings.showNavigationRow !== false} onValueChange={(value) => updateSetting('showNavigationRow', value)} />
+                <SettingRow title="Navigation buttons" detail="Show or hide the back, forward, and home row." value={settings.showNavigationRow !== false} light={isLight} onValueChange={(value) => updateSetting('showNavigationRow', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Bottom dock" detail="Hide the dock; a small Settings button remains so you can restore it." value={settings.showDock !== false} onValueChange={(value) => updateSetting('showDock', value)} />
+                <SettingRow title="Bottom dock" detail="Hide the dock; a small Settings button remains so you can restore it." value={settings.showDock !== false} light={isLight} onValueChange={(value) => updateSetting('showDock', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Welcome section" detail="Show or hide the home-page welcome heading." value={settings.showWelcome !== false} onValueChange={(value) => updateSetting('showWelcome', value)} />
+                <SettingRow title="Welcome section" detail="Show or hide the home-page welcome heading." value={settings.showWelcome !== false} light={isLight} onValueChange={(value) => updateSetting('showWelcome', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Saved pages section" detail="Show or hide bookmarks on the start page." value={settings.showBookmarksSection !== false} onValueChange={(value) => updateSetting('showBookmarksSection', value)} />
+                <SettingRow title="Saved pages section" detail="Show or hide bookmarks on the start page." value={settings.showBookmarksSection !== false} light={isLight} onValueChange={(value) => updateSetting('showBookmarksSection', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Search provider footer" detail="Show or hide the search engine note at the bottom." value={settings.showSearchFooter !== false} onValueChange={(value) => updateSetting('showSearchFooter', value)} />
+                <SettingRow title="Search provider footer" detail="Show or hide the search engine note at the bottom." value={settings.showSearchFooter !== false} light={isLight} onValueChange={(value) => updateSetting('showSearchFooter', value)} />
               </View>
 
               <Text style={styles.settingsSectionTitle}>Home screen</Text>
               <Text style={styles.settingsIntro}>Choose what appears when Saturn opens.</Text>
-              <View style={styles.settingsCard}>
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <SettingRow
                   title="Daily Bible verse"
                   detail="Show or hide the verse on your Saturn home screen."
                   value={settings.showDailyVerse}
-                  onValueChange={(value) => updateSetting('showDailyVerse', value)}
+                  light={isLight} onValueChange={(value) => updateSetting('showDailyVerse', value)}
                 />
               </View>
 
               <Text style={styles.settingsSectionTitle}>Appearance & layout</Text>
               <Text style={styles.settingsIntro}>Tune the start page and bottom dock. Your choices are saved on this device.</Text>
-              <View style={styles.settingsCard}>
-                <SettingRow title="Compact start page" detail="Use a tighter home-screen layout with a smaller welcome heading." value={!!settings.compactHome} onValueChange={(value) => updateSetting('compactHome', value)} />
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+                <SettingRow title="Compact start page" detail="Use a tighter home-screen layout with a smaller welcome heading." value={!!settings.compactHome} light={isLight} onValueChange={(value) => updateSetting('compactHome', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Show browser tagline" detail="Show or hide the text beneath the Lantern name." value={settings.showBrandTagline !== false} onValueChange={(value) => updateSetting('showBrandTagline', value)} />
+                <SettingRow title="Show browser tagline" detail="Show or hide the text beneath the Lantern name." value={settings.showBrandTagline !== false} light={isLight} onValueChange={(value) => updateSetting('showBrandTagline', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Show privacy card" detail="Show or hide the privacy summary on the start page." value={settings.showPrivacySnapshot !== false} onValueChange={(value) => updateSetting('showPrivacySnapshot', value)} />
+                <SettingRow title="Show privacy card" detail="Show or hide the privacy summary on the start page." value={settings.showPrivacySnapshot !== false} light={isLight} onValueChange={(value) => updateSetting('showPrivacySnapshot', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Dock labels" detail="Show or hide Home, Saved, and Settings labels under dock icons." value={settings.showDockLabels !== false} onValueChange={(value) => updateSetting('showDockLabels', value)} />
+                <SettingRow title="Dock labels" detail="Show or hide Home, Saved, and Settings labels under dock icons." value={settings.showDockLabels !== false} light={isLight} onValueChange={(value) => updateSetting('showDockLabels', value)} />
               </View>
               <Text style={styles.settingsSectionTitle}>Quick paths</Text>
               <Text style={styles.settingsIntro}>Turn each shortcut on or off. All are hidden by default.</Text>
-              <View style={styles.settingsCard}>
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 {QUICK_LINKS.map((item, index) => (
                   <React.Fragment key={item.title}>
                     {index > 0 && <View style={styles.settingDivider} />}
@@ -1083,7 +1083,7 @@ export default function App() {
                       title={item.title}
                       detail={'Show ' + item.title + ' on the Lantern home screen.'}
                       value={!!(settings.quickPaths && settings.quickPaths[item.title])}
-                      onValueChange={(value) => updateSetting('quickPaths', { ...(settings.quickPaths || DEFAULT_SETTINGS.quickPaths), [item.title]: value })}
+                      light={isLight} onValueChange={(value) => updateSetting('quickPaths', { ...(settings.quickPaths || DEFAULT_SETTINGS.quickPaths), [item.title]: value })}
                     />
                   </React.Fragment>
                 ))}
@@ -1153,7 +1153,7 @@ export default function App() {
                 {settingsCategory === 'Passwords' && <>
               <Text style={styles.settingsSectionTitle}>Passwords</Text>
               <Text style={styles.settingsIntro}>Choose a password manager, then open it. Saturn does not store your vault or provide native iPhone AutoFill.</Text>
-              <View style={styles.settingsCard}>
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Choose password manager"
@@ -1189,7 +1189,7 @@ export default function App() {
                 {settingsCategory === 'Extensions & tools' && <>
               <Text style={styles.settingsSectionTitle}>Extensions & tools</Text>
               <Text style={styles.settingsIntro}>Choose a web tool or extension directory. iOS WebView does not install desktop browser extensions, so these open as websites instead.</Text>
-              <View style={styles.settingsCard}>
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Choose extension or web tool"
@@ -1224,20 +1224,20 @@ export default function App() {
                 </>}
                 {settingsCategory === 'Security & privacy' && <>
               <Text style={styles.settingsSectionTitle}>Security</Text>
-              <View style={styles.settingsCard}>
-                <SettingRow title="Enhanced ad & tracker blocking" detail="Uses an expanded list of ad and tracking domains, hides common ad containers, and blocks many script-based tracking requests. Some ads may still appear because iOS WebView does not expose every network request." value={settings.blockAds} onValueChange={(value) => updateSetting('blockAds', value)} />
+              <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
+                <SettingRow title="Enhanced ad & tracker blocking" detail="Uses an expanded list of ad and tracking domains, hides common ad containers, and blocks many script-based tracking requests. Some ads may still appear because iOS WebView does not expose every network request." value={settings.blockAds} light={isLight} onValueChange={(value) => updateSetting('blockAds', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Prefer secure connections" detail="Upgrade http links to https, including links you tap, and block insecure mixed content." value={settings.preferHttps} onValueChange={(value) => updateSetting('preferHttps', value)} />
+                <SettingRow title="Prefer secure connections" detail="Upgrade http links to https, including links you tap, and block insecure mixed content." value={settings.preferHttps} light={isLight} onValueChange={(value) => updateSetting('preferHttps', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="JavaScript" detail="Many sites need this to work. Turn it off for a stricter, simpler session." value={settings.javaScriptEnabled} onValueChange={(value) => updateSetting('javaScriptEnabled', value)} />
+                <SettingRow title="JavaScript" detail="Many sites need this to work. Turn it off for a stricter, simpler session." value={settings.javaScriptEnabled} light={isLight} onValueChange={(value) => updateSetting('javaScriptEnabled', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Allow pop-up windows" detail="Keep pop-ups blocked unless a site you trust needs them." value={settings.allowPopups} onValueChange={(value) => updateSetting('allowPopups', value)} />
+                <SettingRow title="Allow pop-up windows" detail="Keep pop-ups blocked unless a site you trust needs them." value={settings.allowPopups} light={isLight} onValueChange={(value) => updateSetting('allowPopups', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Private browsing" detail="Use an isolated, non-persistent website session where the platform supports it." value={settings.privateBrowsing} onValueChange={(value) => updateSetting('privateBrowsing', value)} />
+                <SettingRow title="Private browsing" detail="Use an isolated, non-persistent website session where the platform supports it." value={settings.privateBrowsing} light={isLight} onValueChange={(value) => updateSetting('privateBrowsing', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Block third-party cookies" detail="Prevent embedded third-party sites from setting cookies in the browser view." value={settings.blockThirdPartyCookies} onValueChange={(value) => updateSetting('blockThirdPartyCookies', value)} />
+                <SettingRow title="Block third-party cookies" detail="Prevent embedded third-party sites from setting cookies in the browser view." value={settings.blockThirdPartyCookies} light={isLight} onValueChange={(value) => updateSetting('blockThirdPartyCookies', value)} />
                 <View style={styles.settingDivider} />
-                <SettingRow title="Website storage" detail="Allow sites to remember preferences and keep you signed in. Some sites need this enabled." value={settings.domStorageEnabled} onValueChange={(value) => updateSetting('domStorageEnabled', value)} />
+                <SettingRow title="Website storage" detail="Allow sites to remember preferences and keep you signed in. Some sites need this enabled." value={settings.domStorageEnabled} light={isLight} onValueChange={(value) => updateSetting('domStorageEnabled', value)} />
               </View>
 
               <View style={styles.privacyNote}>
