@@ -63,7 +63,6 @@ const PASSWORD_MANAGERS = {
   'KeePassXC': 'https://keepassxc.org',
 };
 const EXTENSION_TOOLS = {
-  'Bitwarden': 'https://vault.bitwarden.com/',
   'Google Translate': 'https://translate.google.com/',
   'Grammarly': 'https://www.grammarly.com/',
   'Dark Reader': 'https://darkreader.org/',
@@ -379,6 +378,7 @@ export default function App() {
         if (savedSettings) {
           try {
             const parsed = JSON.parse(savedSettings);
+            if (parsed.extensionShortcut === 'Chrome Web Store') parsed.extensionShortcut = 'Google Translate';
             oldBackground = parsed.backgroundImage || null;
             delete parsed.backgroundImage;
             const legacy = { WEB: 'web', KJV: 'kjv' };
