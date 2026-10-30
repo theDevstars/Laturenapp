@@ -17,12 +17,12 @@
       "category": "utilities",
       "versions": [
         {
-          "version": "1.0.75",
-          "buildVersion": "75",
-          "date": "2026-10-30T00:29:40.844Z",
+          "version": "1.0.76",
+          "buildVersion": "76",
+          "date": "2026-10-30T00:57:08.583Z",
           "localizedDescription": "Saturn browser update with improved ad and tracker blocking.",
-          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/saturn-v1.0.75/Saturn-unsigned.ipa",
-          "size": 6821045
+          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/saturn-v1.0.76/Saturn-unsigned.ipa",
+          "size": 6820960
         }
       ],
       "appPermissions": {
