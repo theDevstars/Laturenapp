@@ -7,7 +7,7 @@ function createWindow() {
     height: 850,
     minWidth: 800,
     minHeight: 600,
-    title: 'Lantern',
+    title: 'Saturn',
     backgroundColor: '#101426',
     webPreferences: {
       webviewTag: true,
