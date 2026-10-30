@@ -312,12 +312,12 @@ function IconButton({ label, glyph, onPress, secondary = false }) {
   );
 }
 
-function SettingRow({ title, detail, value, onValueChange }) {
+function SettingRow({ title, detail, value, onValueChange, light = false }) {
   return (
     <View style={styles.settingRow}>
       <View style={styles.settingCopy}>
-        <Text style={styles.settingTitle}>{title}</Text>
-        <Text style={styles.settingDetail}>{detail}</Text>
+        <Text style={[styles.settingTitle, light && { color: '#172033' }]}>{title}</Text>
+        <Text style={[styles.settingDetail, light && { color: '#66738a' }]}>{detail}</Text>
       </View>
       <Switch
         value={value}
@@ -668,7 +668,7 @@ export default function App() {
   };
 
   const renderHome = () => (
-    <ScrollView style={styles.homeScroll} contentContainerStyle={[styles.homeContent, settings.compactHome && styles.homeContentCompact]} keyboardShouldPersistTaps="handled">
+    <ScrollView style={[styles.homeScroll, { backgroundColor: palette.bg }]} contentContainerStyle={[styles.homeContent, settings.compactHome && styles.homeContentCompact]} keyboardShouldPersistTaps="handled">
       {settings.showWelcome !== false && <View style={styles.welcomeBlock}>
         <Text style={styles.eyebrow}>YOUR SPACE ON THE WEB</Text>
         <Text style={[styles.welcomeTitle, settings.compactHome && styles.welcomeTitleCompact]}>A little light{ '\n' }for the way ahead.</Text>
@@ -676,7 +676,7 @@ export default function App() {
       </View>}
 
       {settings.showDailyVerse && (
-        <View style={styles.verseCard}>
+        <View style={[styles.verseCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
           <View style={styles.verseTopline}>
             <View style={styles.verseLabelWrap}>
               <Text style={styles.verseSpark}>✦</Text>
@@ -985,14 +985,14 @@ export default function App() {
         </View>
       </Modal>
       <Modal visible={settingsVisible} animationType="slide" transparent={false} presentationStyle="fullScreen" onRequestClose={() => setSettingsVisible(false)}>
-        <SafeAreaView style={styles.settingsPage}>
-          <View style={styles.settingsPageHeader}>
+        <SafeAreaView style={[styles.settingsPage, { backgroundColor: palette.bg }]}>
+          <View style={[styles.settingsPageHeader, { borderBottomColor: palette.border }]}>
             <Pressable onPress={() => { if (settingsCategory) setSettingsCategory(null); else setSettingsVisible(false); }} style={({ pressed }) => [styles.settingsBackButton, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Back to Saturn">
               <Text style={styles.settingsBackGlyph}>‹</Text>
             </Pressable>
             <View style={styles.settingsPageHeading}>
               <Text style={styles.settingsPageTitle}>{settingsCategory || 'Settings'}</Text>
-              <Text style={styles.settingsPageSubtitle}>{settingsCategory ? 'Customize this part of Saturn' : 'Make Saturn work your way'}</Text>
+              <Text style={[styles.settingsPageSubtitle, { color: palette.muted }]}>{settingsCategory ? 'Customize this part of Saturn' : 'Make Saturn work your way'}</Text>
             </View>
             <Image source={require('./assets/icon.png')} style={styles.settingsPageIcon} />
           </View>
