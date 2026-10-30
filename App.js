@@ -44,7 +44,7 @@ const DEFAULT_SETTINGS = {
   compactHome: false,
   showDockLabels: true,
   showHeader: true,
-  showSearchBar: true,
+  showSearchBar: false,
   showNavigationRow: true,
   showDock: true,
   showWelcome: true,
@@ -780,28 +780,6 @@ export default function App() {
       </View>
       )}
 
-      {!url && settings.showSearchBar !== false && (
-        <View style={[styles.searchRow, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
-          <TextInput
-            value={address}
-            onChangeText={setAddress}
-            onSubmitEditing={() => navigate()}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType={Platform.OS === 'ios' ? 'web-search' : 'default'}
-            returnKeyType="search"
-            selectTextOnFocus
-            placeholder="Search or try !w / !yt"
-            placeholderTextColor="#8995aa"
-            style={styles.addressInput}
-            accessibilityLabel="Search or enter a website"
-          />
-          <Pressable onPress={() => navigate()} style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
-            <Text style={styles.searchButtonText}>Go</Text>
-          </Pressable>
-        </View>
-      )}
-
       {!url && settings.showNavigationRow !== false && (
       <View style={styles.navRow}>
         <IconButton label="Go back" glyph="‹" onPress={() => web.current?.goBack()} secondary />
@@ -847,7 +825,7 @@ export default function App() {
         />
       ) : renderHome()}
 
-      {settings.showDock !== false ? <View style={[styles.bottomDock, url && styles.bottomDockBrowsing]} accessibilityLabel="Browser dock">
+      {settings.showDock !== false ? <View style={[styles.bottomDock, url ? styles.bottomDockBrowsing : styles.bottomDockHome]} accessibilityLabel="Browser dock">
         <Pressable onPress={goHome} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Home">
           <Text style={styles.dockGlyph}>⌂</Text>
         </Pressable>
@@ -873,9 +851,26 @@ export default function App() {
             </Pressable>
           </View>
         ) : (
-          <Pressable onPress={() => { setUrl(null); setAddress(''); }} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Search">
-            <Text style={styles.dockGlyph}>⌕</Text><Text style={styles.dockLabel}>Search</Text>
-          </Pressable>
+          <View style={[styles.safariAddressBar, styles.homeDockSearch, { backgroundColor: palette.bg, borderColor: palette.border }]}>
+            <Text style={styles.safariLock}>⌕</Text>
+            <TextInput
+              value={address}
+              onChangeText={setAddress}
+              onSubmitEditing={() => navigate()}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType={Platform.OS === 'ios' ? 'web-search' : 'default'}
+              returnKeyType="search"
+              selectTextOnFocus
+              placeholder="Search or enter website"
+              placeholderTextColor="#8995aa"
+              style={styles.safariAddressInput}
+              accessibilityLabel="Search or enter a website"
+            />
+            <Pressable onPress={() => navigate()} style={styles.safariReload} accessibilityRole="button" accessibilityLabel="Search">
+              <Text style={styles.safariReloadGlyph}>→</Text>
+            </Pressable>
+          </View>
         )}
         {url && (
           <Pressable onPress={() => openBookmarkEditor()} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Save current page">
@@ -1304,6 +1299,8 @@ const styles = StyleSheet.create({
   hiddenSettingsButton: { position: 'absolute', right: 12, bottom: 12, width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: '#172238', borderWidth: 1, borderColor: '#e6ad60' },
   bottomDock: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginHorizontal: 22, marginTop: 5, marginBottom: Platform.OS === 'ios' ? 8 : 10, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 23, backgroundColor: 'rgba(23, 34, 56, 0.97)', borderWidth: 1, borderColor: '#35435c', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
   bottomDockBrowsing: { marginHorizontal: 12, paddingHorizontal: 7, gap: 5 },
+  bottomDockHome: { marginHorizontal: 14, marginTop: 10, marginBottom: Platform.OS === 'ios' ? 12 : 14, paddingHorizontal: 12, paddingVertical: 12, minHeight: 76, gap: 8, borderRadius: 26 },
+  homeDockSearch: { flex: 1, minWidth: 0, height: 48, borderRadius: 18, paddingLeft: 12, paddingRight: 5 },
   safariAddressBar: { flex: 1, minWidth: 0, height: 42, flexDirection: 'row', alignItems: 'center', backgroundColor: '#0d1728', borderWidth: 1, borderColor: '#3b4961', borderRadius: 15, paddingLeft: 10, paddingRight: 4, gap: 5 },
   safariLock: { color: '#8bd1b1', fontSize: 17 },
   safariAddressInput: { flex: 1, minWidth: 0, paddingVertical: 4, color: '#f3f5f8', fontSize: 13 },
