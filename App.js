@@ -746,7 +746,7 @@ export default function App() {
         </Pressable>
       )}
       {bookmarks.map((item) => (
-        <Pressable key={item.id} onPress={() => openSavedPage(item)} style={styles.savedHomeRow}>
+        <Pressable key={item.id} onPress={() => openSavedPage(item)} style={[styles.savedHomeRow, { backgroundColor: palette.surfaceAlt }]}>
           <Text style={styles.savedHomeMark}>↗</Text>
           <View style={styles.savedHomeCopy}>
             <Text numberOfLines={1} style={styles.savedHomeTitle}>{item.name}</Text>
@@ -763,14 +763,14 @@ export default function App() {
   return (
     <ImageBackground
       source={background ? { uri: background } : undefined}
-      style={styles.root}
+      style={[styles.root, { backgroundColor: palette.bg }]}
       imageStyle={styles.backgroundImageStyle}
       resizeMode="cover"
     >
-    <SafeAreaView style={[styles.safeRoot, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight || 0 }]}>
-      <NativeStatusBar barStyle="light-content" backgroundColor="#0b1220" />
+    <SafeAreaView style={[styles.safeRoot, { backgroundColor: palette.bg }, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight || 0 }]}>
+      <NativeStatusBar barStyle={isLight ? 'dark-content' : 'light-content'} backgroundColor={palette.bg} />
       {!url && settings.showHeader !== false && (
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: palette.bg }]}>
         <View style={styles.brand}>
           <Image source={require('./assets/icon.png')} style={styles.brandIcon} />
           <View>
@@ -819,7 +819,7 @@ export default function App() {
       </View>
       )}
 
-      {loading && <ActivityIndicator color="#e5ad62" style={styles.progress} />}
+      {loading && <ActivityIndicator color={palette.accent} style={styles.progress} />}
       {url ? (
         <WebView
           key={webKey + (settings.privateBrowsing ? '-p' : '-n')}
@@ -946,7 +946,7 @@ export default function App() {
         <View style={styles.modalBackdrop}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setEditorVisible(false)} accessibilityLabel="Close bookmark editor" />
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetKeyboard}>
-            <View style={styles.sheet}>
+            <View style={[styles.sheet, { backgroundColor: palette.surface, borderColor: palette.border }]}>
               <View style={styles.sheetHandle} />
               <View style={styles.sheetHeader}>
                 <View>
@@ -1007,7 +1007,7 @@ export default function App() {
                   { title: 'Security & privacy', detail: 'Tracking protection, cookies and secure browsing', icon: '◈' },
                   { title: 'Browsing data', detail: 'Clear browser history and cached data', icon: '⌫' },
                 ].map((item) => (
-                  <Pressable key={item.title} onPress={() => setSettingsCategory(item.title)} style={({ pressed }) => [styles.settingsCategoryCard, pressed && styles.pressed]}>
+                  <Pressable key={item.title} onPress={() => setSettingsCategory(item.title)} style={({ pressed }) => [styles.settingsCategoryCard, { backgroundColor: palette.surface, borderColor: palette.border }, pressed && styles.pressed]}>
                     <View style={styles.settingsCategoryIcon}><Text style={styles.settingsCategoryGlyph}>{item.icon}</Text></View>
                     <View style={styles.settingsCategoryCopy}><Text style={styles.settingsCategoryTitle}>{item.title}</Text><Text style={styles.settingsCategoryDetail}>{item.detail}</Text></View>
                     <Text style={styles.settingsCategoryChevron}>›</Text>
@@ -1282,7 +1282,8 @@ const styles = StyleSheet.create({
   themeChoiceGlyph: { fontSize: 23, fontWeight: '700' },
   themeChoiceText: { fontSize: 14, fontWeight: '800' },
   themeChoiceCheck: { marginLeft: 'auto', color: '#e8b76d', fontWeight: '900', fontSize: 16 },
-  dockIconTile: { minWidth: 43, minHeight: 43, borderRadius: 14, paddingHorizontal: 6, paddingVertical: 4 },
+  dockIconTile: { minWidth: 43, minHeight: 43, borderRadius: 14, paddingHorizontal: 6, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(128,145,180,0.22)' },
+
   settingsDockGlyph: { fontSize: 21, lineHeight: 24 },
 
   backgroundImageStyle: { opacity: 0.28 },
