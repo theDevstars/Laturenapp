@@ -1186,7 +1186,7 @@ export default function App() {
                 </>}
                 {settingsCategory === 'Security & privacy' && <>
               <Text style={[styles.settingsSectionTitle, { color: palette.accent }]}>Passwords</Text>
-              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Choose a password manager and open its secure website. Saturn never stores your vault passwords.</Text>
+              <Text style={[styles.settingsIntro, { color: palette.muted }]}>Open your password manager inside Saturn. Some providers may require Safari for secure sign-in; Saturn never stores your vault passwords.</Text>
               <View style={[styles.settingsCard, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
                 <Pressable
                   accessibilityRole="button"
@@ -1212,7 +1212,7 @@ export default function App() {
                 ))}
                 <View style={styles.settingDivider} />
                 <Pressable
-                  onPress={() => Linking.openURL(PASSWORD_MANAGERS[settings.passwordManager] || PASSWORD_MANAGERS.Bitwarden).catch(() => Alert.alert('Could not open password manager', 'Check your connection and try again.'))}
+                  onPress={() => { const managerUrl = PASSWORD_MANAGERS[settings.passwordManager] || PASSWORD_MANAGERS.Bitwarden; setSettingsVisible(false); navigate(managerUrl); }}
                   style={({ pressed }) => [styles.settingsActionButton, pressed && styles.pressed]}
                 >
                   <Text style={styles.settingsActionButtonText}>Open {settings.passwordManager || 'Bitwarden'} ↗</Text>
