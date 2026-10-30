@@ -1,7 +1,7 @@
 name: Build Saturn IPA, APK and EXE
 
 concurrency:
-  group: lantern-build-${{ github.ref }}
+  group: saturn-build-${{ github.ref }}
   cancel-in-progress: false
 
 on:
@@ -69,12 +69,12 @@ jobs:
           rm -rf Payload
           mkdir -p Payload
           cp -R "$APP_PATH" Payload/
-          zip -r Lantern-unsigned.ipa Payload
-          test -s Lantern-unsigned.ipa
+          zip -r Saturn-unsigned.ipa Payload
+          test -s Saturn-unsigned.ipa
       - uses: actions/upload-artifact@v4
         with:
-          name: Lantern-unsigned-IPA
-          path: Lantern-unsigned.ipa
+          name: Saturn-unsigned-IPA
+          path: Saturn-unsigned.ipa
           if-no-files-found: error
           retention-days: 7
 
@@ -112,7 +112,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Lantern-APK
+          name: Saturn-APK
           path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 7
@@ -140,7 +140,7 @@ jobs:
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Lantern-Windows-EXE
+          name: Saturn-Windows-EXE
           path: desktop/dist/*.exe
           if-no-files-found: error
           retention-days: 7
@@ -153,25 +153,25 @@ jobs:
       - name: Download IPA artifact
         uses: actions/download-artifact@v4
         with:
-          name: Lantern-unsigned-IPA
+          name: Saturn-unsigned-IPA
           path: release-files
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
-          name: Lantern-APK
+          name: Saturn-APK
           path: release-files
       - name: Download Windows EXE artifact
         uses: actions/download-artifact@v4
         with:
-          name: Lantern-Windows-EXE
+          name: Saturn-Windows-EXE
           path: release-files
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: lantern-v1.0.${{ github.run_number }}
-          name: Lantern v1.0.${{ github.run_number }} - Bible Verse Update
+          tag_name: saturn-v1.0.${{ github.run_number }}
+          name: Saturn v1.0.${{ github.run_number }} - Bible Verse Update
           body: |
-            Lantern browser with a DuckDuckGo home screen, optional daily rotating Bible verse, saved pages, and security settings.
+            Saturn browser with a DuckDuckGo home screen, optional daily rotating Bible verse, saved pages, and security settings.
 
             Assets:
             - Android APK: intended for Android devices.
@@ -183,11 +183,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BUILD_NUMBER: ${{ github.run_number }}
-          RELEASE_TAG: lantern-v1.0.${{ github.run_number }}
+          RELEASE_TAG: saturn-v1.0.${{ github.run_number }}
         run: |
           CURRENT_BUILD=$(gh api repos/theDevstars/Laturenapp/contents/sidestore-source.json --jq .content | base64 -d | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).apps[0].versions[0].buildVersion||0)}catch{console.log(0)}})")
           if [ "$CURRENT_BUILD" -gt "$BUILD_NUMBER" ]; then echo "A newer source is already published; keeping it."; exit 0; fi
-          export IPA_SIZE=$(stat -c%s release-files/Lantern-unsigned.ipa)
-          node -e "const fs=require('fs'); const build=process.env.BUILD_NUMBER; const tag=process.env.RELEASE_TAG; const source={name:'Lantern',subtitle:'A calmer web browser',description:'Lantern for iPhone and iPad. Updates are published with each GitHub release.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',website:'https://github.com/theDevstars/Laturenapp',tintColor:'#DDAF64',apps:[{name:'Lantern',bundleIdentifier:'com.yourname.lantern',developerName:'theDevstars',subtitle:'Browse with a little more calm',localizedDescription:'Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',tintColor:'#DDAF64',category:'utilities',versions:[{version:'1.0.'+build,buildVersion:build,date:new Date().toISOString(),localizedDescription:'Lantern browser update.',downloadURL:'https://github.com/theDevstars/Laturenapp/releases/download/'+tag+'/Lantern-unsigned.ipa',size:Number(process.env.IPA_SIZE)}],appPermissions:{entitlements:[],privacy:{NSPhotoLibraryUsageDescription:'Choose a wallpaper for Lantern.'}}}],news:[]};fs.writeFileSync('sidestore-source.json',JSON.stringify(source,null,2)+'\\n');"
+          export IPA_SIZE=$(stat -c%s release-files/Saturn-unsigned.ipa)
+          node -e "const fs=require('fs'); const build=process.env.BUILD_NUMBER; const tag=process.env.RELEASE_TAG; const source={name:'Saturn',subtitle:'A calmer web browser',description:'Saturn for iPhone and iPad. Updates are published with each GitHub release.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',website:'https://github.com/theDevstars/Laturenapp',tintColor:'#DDAF64',apps:[{name:'Saturn',bundleIdentifier:'com.yourname.lantern',developerName:'theDevstars',subtitle:'Browse with a little more calm',localizedDescription:'Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.',iconURL:'https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png',tintColor:'#DDAF64',category:'utilities',versions:[{version:'1.0.'+build,buildVersion:build,date:new Date().toISOString(),localizedDescription:'Saturn browser update.',downloadURL:'https://github.com/theDevstars/Laturenapp/releases/download/'+tag+'/Saturn-unsigned.ipa',size:Number(process.env.IPA_SIZE)}],appPermissions:{entitlements:[],privacy:{NSPhotoLibraryUsageDescription:'Choose a wallpaper for Saturn.'}}}],news:[]};fs.writeFileSync('sidestore-source.json',JSON.stringify(source,null,2)+'\\n');"
           FILE_SHA=$(gh api repos/theDevstars/Laturenapp/contents/sidestore-source.json --jq .sha)
           gh api repos/theDevstars/Laturenapp/contents/sidestore-source.json --method PUT --field message="Update SideStore source for $RELEASE_TAG" --field content="$(base64 -w0 sidestore-source.json)" --field sha="$FILE_SHA" --field branch=main
