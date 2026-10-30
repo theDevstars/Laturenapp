@@ -73,27 +73,100 @@ const SEARCH_ENGINES = {
   Google: 'https://www.google.com/search?q=',
   Bing: 'https://www.bing.com/search?q=',
 };
-// Lightweight ad/tracker host list plus cosmetic hiding. This is not the full uBlock Origin engine;
-// WebView navigation callbacks cannot reliably filter every subresource on iOS.
+// Expanded ad/tracker rules. This is a best-effort WebView filter, not a full
+// network-level content blocker like uBlock Origin. iOS WebView cannot expose
+// every subresource request to React Native, so cosmetic/script filtering helps too.
 const AD_TRACKER_HOSTS = [
+  // Google advertising and measurement
   'doubleclick.net', 'googlesyndication.com', 'googleadservices.com',
-  'adservice.google.com', 'adnxs.com', 'adsrvr.org', 'adform.net',
-  'taboola.com', 'outbrain.com', 'scorecardresearch.com', 'criteo.com',
-  'hotjar.com', 'clarity.ms', 'mixpanel.com', 'segment.io',
-  'googletagmanager.com', 'google-analytics.com', 'facebook.net',
-  'connect.facebook.net', 'amazon-adsystem.com', 'advertising.com',
+  'adservice.google.com', 'pagead2.googlesyndication.com', 'googletagservices.com',
+  'google-analytics.com', 'analytics.google.com', 'googletagmanager.com',
+  '2mdn.net', 'admeld.com', 'admob.com', 'adsense.com',
+  // Major ad exchanges, networks and retargeters
+  'adnxs.com', 'adsrvr.org', 'adform.net', 'advertising.com',
+  'criteo.com', ' taboola.com'.trim(), 'outbrain.com', 'revcontent.com',
+  'mgid.com', 'zemanta.com', 'teads.tv', 'smartadserver.com',
+  'openx.net', 'pubmatic.com', 'rubiconproject.com', ' lijit.com'.trim(),
+  'sharethrough.com', 'indexexchange.com', 'casalemedia.com',
+  'bidswitch.net', 'yieldmo.com', '33across.com', 'media.net',
+  'contextweb.com', 'sovrn.com', 'triplelift.com', 'undertone.com',
+  'popads.net', 'propellerads.com', 'popcash.net', ' adsterra.com'.trim(),
+  // Social tracking, analytics and session replay
+  'connect.facebook.net', 'facebook.net', 'pixel.facebook.com',
+  'analytics.tiktok.com', 'ads.tiktok.com', 'snap.licdn.com',
+  'px.ads.linkedin.com', 'bat.bing.com', 'clarity.ms',
+  'hotjar.com', 'fullstory.com', 'mouseflow.com', 'luckyorange.com',
+  'mixpanel.com', 'segment.io', 'segment.com', 'amplitude.com',
+  'heapanalytics.com', 'quantserve.com', 'scorecardresearch.com',
+  'branch.io', 'adjust.com', 'appsflyer.com', 'kochava.com',
+  'amazon-adsystem.com', 'assoc-amazon.com', 'advertising.amazon.com',
 ];
 const AD_COSMETIC_SCRIPT = `(function() {
-  var css = 'iframe[src*="doubleclick"],iframe[src*="googlesyndication"],iframe[id*="google_ads"],[id^="google_ads"],[class*="ad-slot"],[class*="ad-container"],[class*="advertisement"],[data-ad-slot],[aria-label="Advertisement"]{display:none!important;visibility:hidden!important}';
-  function addStyle() {
-    if (document.getElementById('__saturn_ad_rules')) return;
-    var style = document.createElement('style');
-    style.id = '__saturn_ad_rules';
-    style.textContent = css;
-    (document.head || document.documentElement).appendChild(style);
+  if (window.__saturnContentFilterInstalled) return true;
+  window.__saturnContentFilterInstalled = true;
+  var hosts = ["doubleclick.net","googlesyndication.com","googleadservices.com","adservice.google.com","pagead2.googlesyndication.com","googletagservices.com","google-analytics.com","analytics.google.com","googletagmanager.com","2mdn.net","admeld.com","admob.com","adsense.com","adnxs.com","adsrvr.org","adform.net","advertising.com","criteo.com","taboola.com","outbrain.com","revcontent.com","mgid.com","zemanta.com","teads.tv","smartadserver.com","openx.net","pubmatic.com","rubiconproject.com","lijit.com","sharethrough.com","indexexchange.com","casalemedia.com","bidswitch.net","yieldmo.com","33across.com","media.net","contextweb.com","sovrn.com","triplelift.com","undertone.com","popads.net","propellerads.com","popcash.net","adsterra.com","connect.facebook.net","facebook.net","pixel.facebook.com","analytics.tiktok.com","ads.tiktok.com","snap.licdn.com","px.ads.linkedin.com","bat.bing.com","clarity.ms","hotjar.com","fullstory.com","mouseflow.com","luckyorange.com","mixpanel.com","segment.io","segment.com","amplitude.com","heapanalytics.com","quantserve.com","scorecardresearch.com","branch.io","adjust.com","appsflyer.com","kochava.com","amazon-adsystem.com","assoc-amazon.com","advertising.amazon.com"];
+  function blocked(value) {
+    try {
+      var h = new URL(value, location.href).hostname.toLowerCase();
+      return hosts.some(function(host) { return h === host || h.endsWith('.' + host); });
+    } catch (_) { return false; }
   }
-  addStyle();
-  new MutationObserver(addStyle).observe(document.documentElement, {childList:true,subtree:true});
+  var css = [
+    'iframe[src*="doubleclick"],iframe[src*="googlesyndication"],iframe[id*="google_ads"]',
+    '[id^="google_ads"],[id*="ad-slot"],[id*="ad_slot"],[class*="ad-slot"],[class*="ad_slot"]',
+    '[class*="ad-container"],[class*="ad_container"],[class*="advertisement"],[class~="adsbygoogle"]',
+    '[data-ad-slot],[data-ad-client],[data-google-query-id],[aria-label="Advertisement"]',
+    'amp-ad,amp-embed,ins.adsbygoogle,.ad-banner,.ad-wrapper,.sponsored-content'
+  ].join(',') + '{display:none!important;visibility:hidden!important;pointer-events:none!important}';
+  function addStyle() {
+    if (!document.getElementById('__saturn_ad_rules')) {
+      var style = document.createElement('style');
+      style.id = '__saturn_ad_rules';
+      style.textContent = css;
+      (document.head || document.documentElement).appendChild(style);
+    }
+  }
+  function clean(root) {
+    if (!root || !root.querySelectorAll) return;
+    root.querySelectorAll('script[src],iframe[src],img[src],source[src],video[src],audio[src]').forEach(function(el) {
+      if (blocked(el.getAttribute('src'))) el.remove();
+    });
+    addStyle();
+  }
+  // Block script-driven requests to known advertising/analytics hosts.
+  var nativeFetch = window.fetch;
+  if (nativeFetch) window.fetch = function(input, init) {
+    var value = typeof input === 'string' ? input : input && input.url;
+    if (value && blocked(value)) return Promise.reject(new TypeError('Blocked by Saturn content filter'));
+    return nativeFetch.apply(this, arguments);
+  };
+  var nativeOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(method, url) {
+    if (blocked(url)) { this.__saturnBlocked = true; return nativeOpen.call(this, method, 'about:blank'); }
+    this.__saturnBlocked = false;
+    return nativeOpen.apply(this, arguments);
+  };
+  var nativeSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function() {
+    if (this.__saturnBlocked) { try { this.abort(); } catch (_) {} return; }
+    return nativeSend.apply(this, arguments);
+  };
+  if (navigator.sendBeacon) {
+    var nativeBeacon = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = function(url, data) { return blocked(url) ? false : nativeBeacon(url, data); };
+  }
+  clean(document);
+  new MutationObserver(function(records) {
+    records.forEach(function(record) {
+      record.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) {
+          if (node.matches && node.matches('[src]') && blocked(node.getAttribute('src'))) node.remove();
+          clean(node);
+        }
+      });
+    });
+  }).observe(document.documentElement, {childList:true,subtree:true});
+  return true;
 })(); true;`;
 
 const QUICK_LINKS = [
@@ -521,7 +594,7 @@ export default function App() {
   };
 
   const deleteBookmark = (bookmark) => {
-    Alert.alert('Remove saved page?', '“' + bookmark.name + '” will be removed from Lantern.', [
+    Alert.alert('Remove saved page?', '“' + bookmark.name + '” will be removed from Saturn.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
@@ -545,7 +618,7 @@ export default function App() {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Photo access needed', 'Allow Lantern to choose a photo for your home background.');
+        Alert.alert('Photo access needed', 'Allow Saturn to choose a photo for your home background.');
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -696,7 +769,7 @@ export default function App() {
         <View style={styles.brand}>
           <Image source={require('./assets/icon.png')} style={styles.brandIcon} />
           <View>
-            <Text style={styles.brandName}>Lantern</Text>
+            <Text style={styles.brandName}>Saturn</Text>
             {settings.showBrandTagline !== false && <Text style={styles.brandTagline}>Browse with a little more calm</Text>}
           </View>
         </View>
@@ -898,7 +971,7 @@ export default function App() {
         <View style={styles.setupBackdrop}>
           <View style={styles.setupCard}>
             <Text style={styles.setupSpark}>✳</Text>
-            <Text style={styles.setupTitle}>Meet Lantern</Text>
+            <Text style={styles.setupTitle}>Meet Saturn</Text>
             <Text style={styles.setupBody}>Let’s set up your browser just the way you like it. Start with privacy-minded defaults, then choose which shortcuts appear on your home screen.</Text>
             <Pressable style={styles.setupPrimary} onPress={() => finishSetup(false)}><Text style={styles.setupPrimaryText}>✓  Use defaults</Text></Pressable>
             <Pressable style={styles.setupSecondary} onPress={() => finishSetup(true)}><Text style={styles.setupSecondaryText}>→  Configure</Text></Pressable>
@@ -1135,7 +1208,7 @@ export default function App() {
                 {settingsCategory === 'Security & privacy' && <>
               <Text style={styles.settingsSectionTitle}>Security</Text>
               <View style={styles.settingsCard}>
-                <SettingRow title="Block ads and trackers (basic)" detail="Blocks requests to a small list of known ad/tracker hosts and hides some common ad elements. This is not the full uBlock Origin extension." value={settings.blockAds} onValueChange={(value) => updateSetting('blockAds', value)} />
+                <SettingRow title="Enhanced ad & tracker blocking" detail="Uses an expanded list of ad and tracking domains, hides common ad containers, and blocks many script-based tracking requests. Some ads may still appear because iOS WebView does not expose every network request." value={settings.blockAds} onValueChange={(value) => updateSetting('blockAds', value)} />
                 <View style={styles.settingDivider} />
                 <SettingRow title="Prefer secure connections" detail="Upgrade http links to https, including links you tap, and block insecure mixed content." value={settings.preferHttps} onValueChange={(value) => updateSetting('preferHttps', value)} />
                 <View style={styles.settingDivider} />
@@ -1156,8 +1229,8 @@ export default function App() {
                   <Text style={styles.privacyNoteTitle}>Built for a little more privacy</Text>
                   <Text style={styles.privacyNoteBody}>
                     {Platform.OS === 'android'
-                      ? 'Saturn blocks local-file access. Third-party cookies are ' + (settings.blockThirdPartyCookies ? 'blocked' : 'allowed') + '. Search stays with your selected provider.'
-                      : 'Saturn blocks local-file access. Third-party cookies are ' + (settings.blockThirdPartyCookies ? 'blocked' : 'allowed') + '. Private browsing uses the WebView private-session option, whose behavior can vary by iOS version. Search stays with your selected provider.'}
+                      ? 'Saturn blocks local-file access. Android can restrict third-party cookies; iOS WebView does not provide an equivalent reliable all-cookie switch. Search stays with your selected provider.'
+                      : 'Saturn blocks local-file access. iOS WebView does not provide a reliable switch to block every cookie; private-session behavior can vary by iOS version. Search stays with your selected provider.'}
                   </Text>
                 </View>
               </View>
