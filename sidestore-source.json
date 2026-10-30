@@ -11,18 +11,18 @@
       "bundleIdentifier": "com.yourname.lantern",
       "developerName": "theDevstars",
       "subtitle": "Browse with a little more calm",
-      "localizedDescription": "Search the web with DuckDuckGo, save pages, and read a rotating daily Bible verse.",
+      "localizedDescription": "Search the web with DuckDuckGo, block many ads and trackers, save pages, and read a rotating daily Bible verse.",
       "iconURL": "https://raw.githubusercontent.com/theDevstars/Laturenapp/main/assets/icon.png",
       "tintColor": "#DDAF64",
       "category": "utilities",
       "versions": [
         {
-          "version": "1.0.64",
-          "buildVersion": "64",
-          "date": "2026-10-30T00:10:29.654Z",
-          "localizedDescription": "Saturn browser update.",
-          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/saturn-v1.0.64/Saturn-unsigned.ipa",
-          "size": 6817082
+          "version": "1.0.75",
+          "buildVersion": "75",
+          "date": "2026-10-30T00:29:40.844Z",
+          "localizedDescription": "Saturn browser update with improved ad and tracker blocking.",
+          "downloadURL": "https://github.com/theDevstars/Laturenapp/releases/download/saturn-v1.0.75/Saturn-unsigned.ipa",
+          "size": 6821045
         }
       ],
       "appPermissions": {
