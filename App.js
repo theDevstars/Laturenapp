@@ -30,6 +30,7 @@ const SETUP_KEY = '@lantern/setup-complete-v1';
 const MAX_BACKGROUND_CHARS = 1500000;
 const DEFAULT_SETTINGS = {
   searchEngine: 'DuckDuckGo',
+  theme: 'dark',
   preferHttps: true,
   javaScriptEnabled: true,
   allowPopups: false,
@@ -337,6 +338,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const isLight = settings.theme === 'light';
+  const palette = isLight
+    ? { bg: '#f3f5f9', surface: '#ffffff', surfaceAlt: '#e9edf5', border: '#d5dce8', text: '#172033', muted: '#66738a', accent: '#4169d8', accentSoft: '#e5ebff', dock: 'rgba(255,255,255,0.97)' }
+    : { bg: '#0b1220', surface: '#111b2c', surfaceAlt: '#172238', border: '#293752', text: '#f2f5fa', muted: '#93a2b8', accent: '#e8b76d', accentSoft: '#26354d', dock: 'rgba(23,34,56,0.97)' };
   const [passwordMenuOpen, setPasswordMenuOpen] = useState(false);
   const [extensionMenuOpen, setExtensionMenuOpen] = useState(false);
   const [background, setBackground] = useState(null);
@@ -777,7 +782,7 @@ export default function App() {
       )}
 
       {!url && settings.showSearchBar !== false && (
-        <View style={styles.searchRow}>
+        <View style={[styles.searchRow, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}>
           <TextInput
             value={address}
             onChangeText={setAddress}
@@ -848,7 +853,7 @@ export default function App() {
           <Text style={styles.dockGlyph}>⌂</Text>
         </Pressable>
         {url ? (
-          <View style={styles.safariAddressBar}>
+          <View style={[styles.safariAddressBar, { backgroundColor: palette.bg, borderColor: palette.border }]}>
             <Text style={styles.safariLock}>⌑</Text>
             <TextInput
               value={address}
@@ -878,18 +883,18 @@ export default function App() {
             <Text style={styles.dockGlyph}>＋</Text>
           </Pressable>
         )}
-        <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
-          <Text style={styles.dockGlyph}>▤</Text>{!url && settings.showDockLabels !== false && <Text style={styles.dockLabel}>Saved</Text>}
+        <Pressable onPress={() => setBookmarksVisible(true)} style={({ pressed }) => [styles.dockItem, styles.dockIconTile, { backgroundColor: isLight ? '#e5ebff' : '#26354d' }, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Saved pages">
+          <Text style={[styles.dockGlyph, { color: palette.accent }]}>▣</Text>{!url && settings.showDockLabels !== false && <Text style={[styles.dockLabel, { color: palette.muted }]}>Saved</Text>}
         </Pressable>
-        <Pressable onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.dockItem, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Settings">
-          <Text style={styles.dockGlyph}>⚙</Text>{!url && settings.showDockLabels !== false && <Text style={styles.dockLabel}>Settings</Text>}
+        <Pressable onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.dockItem, styles.dockIconTile, { backgroundColor: isLight ? '#e5ebff' : '#26354d' }, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Settings">
+          <Text style={[styles.dockGlyph, styles.settingsDockGlyph, { color: palette.accent }]}>⚙︎</Text>{!url && settings.showDockLabels !== false && <Text style={[styles.dockLabel, { color: palette.muted }]}>Settings</Text>}
         </Pressable>
       </View> : <Pressable onPress={() => setSettingsVisible(true)} style={styles.hiddenSettingsButton} accessibilityRole="button" accessibilityLabel="Open Settings"><Text style={styles.dockGlyph}>⚙</Text></Pressable>}
 
       <Modal visible={bookmarksVisible} animationType="slide" transparent onRequestClose={() => setBookmarksVisible(false)}>
-        <View style={styles.modalBackdrop}>
+        <View style={[styles.modalBackdrop, { backgroundColor: isLight ? 'rgba(25,35,55,0.28)' : 'rgba(3,8,17,0.7)' }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setBookmarksVisible(false)} accessibilityLabel="Close saved pages" />
-          <View style={styles.sheet}>
+          <View style={[styles.sheet, { backgroundColor: palette.surface, borderColor: palette.border }]}>
             <View style={styles.sheetHandle} />
             <View style={styles.sheetHeader}>
               <View>
@@ -1012,6 +1017,18 @@ export default function App() {
             ) : (
               <>
                 {settingsCategory === 'Customization' && (<>
+              <Text style={styles.settingsSectionTitle}>Color theme</Text>
+              <Text style={styles.settingsIntro}>Choose separate colors for Saturn’s dark and light appearance.</Text>
+              <View style={styles.themeChoices}>
+                <Pressable onPress={() => updateSetting('theme', 'dark')} style={[styles.themeChoice, { backgroundColor: settings.theme !== 'light' ? '#172238' : palette.surface, borderColor: settings.theme !== 'light' ? '#e8b76d' : palette.border }]}>
+                  <Text style={[styles.themeChoiceGlyph, { color: '#e8b76d' }]}>☾</Text><Text style={[styles.themeChoiceText, { color: settings.theme !== 'light' ? '#ffffff' : palette.text }]}>Dark</Text>
+                  {settings.theme !== 'light' && <Text style={styles.themeChoiceCheck}>✓</Text>}
+                </Pressable>
+                <Pressable onPress={() => updateSetting('theme', 'light')} style={[styles.themeChoice, { backgroundColor: settings.theme === 'light' ? '#e5ebff' : palette.surface, borderColor: settings.theme === 'light' ? '#4169d8' : palette.border }]}>
+                  <Text style={[styles.themeChoiceGlyph, { color: '#4169d8' }]}>☀</Text><Text style={[styles.themeChoiceText, { color: settings.theme === 'light' ? '#172033' : palette.text }]}>Light</Text>
+                  {settings.theme === 'light' && <Text style={[styles.themeChoiceCheck, { color: '#4169d8' }]}>✓</Text>}
+                </Pressable>
+              </View>
               <Text style={styles.settingsSectionTitle}>Interface controls</Text>
               <Text style={styles.settingsIntro}>Choose exactly what stays on screen. Hide Everything keeps a small Settings button available so you can restore your layout.</Text>
               <View style={styles.backgroundActions}>
@@ -1260,6 +1277,14 @@ export default function App() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#0b1220' },
+  themeChoices: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  themeChoice: { flex: 1, minHeight: 72, borderRadius: 15, borderWidth: 1.5, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 9 },
+  themeChoiceGlyph: { fontSize: 23, fontWeight: '700' },
+  themeChoiceText: { fontSize: 14, fontWeight: '800' },
+  themeChoiceCheck: { marginLeft: 'auto', color: '#e8b76d', fontWeight: '900', fontSize: 16 },
+  dockIconTile: { minWidth: 43, minHeight: 43, borderRadius: 14, paddingHorizontal: 6, paddingVertical: 4 },
+  settingsDockGlyph: { fontSize: 21, lineHeight: 24 },
+
   backgroundImageStyle: { opacity: 0.28 },
   safeRoot: { flex: 1, backgroundColor: 'transparent' },
   header: { paddingHorizontal: 18, paddingTop: 10, paddingBottom: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
