@@ -25,4 +25,4 @@ If you only have your iPhone and no computer, tell me and I can guide you throug
 
 - This is a development preview, not an App Store release.
 - The unsigned IPA workflow creates a build artifact, but an unsigned IPA generally cannot be installed on an iPhone without appropriate signing and provisioning.
-- Before distribution, replace the placeholder iOS bundle identifier `com.yourname.lantern` in `app.json` with an identifier you control.
+- The iOS and Android application identifiers are kept stable for updates to existing installations.
